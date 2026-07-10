@@ -1,0 +1,26 @@
+{
+  "name": "ai-vuln-hunter-mcp",
+  "version": "0.1.0",
+  "description": "AI 漏洞挖掘应用 · 工具接入层 MCP Server（软安 SAST 接入示例）",
+  "main": "server.js",
+  "bin": {
+    "ai-vuln-hunter-mcp": "server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-client.js"
+  },
+  "keywords": [
+    "mcp",
+    "sast",
+    "vulnerability",
+    "ruanan"
+  ],
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  }
+}

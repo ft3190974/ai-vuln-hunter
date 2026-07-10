@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/code-snippet.schema.json",
+  "title": "CodeSnippet",
+  "description": "代码片段信息模型。LLM 进行深度判定与修复的核心输入。设计原则：携带足够上下文（函数体 + 关键调用上下文），但不超过 LLM 上下文窗口。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "language", "primaryLine", "startLine", "endLine", "contextType"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "description": "代码文本（含上下文窗口）。建议单片段不超过 200 行，超出应切片。"
+    },
+    "language": {
+      "type": "string",
+      "description": "代码语言标识，用于解析与高亮",
+      "examples": ["java", "python", "javascript", "c", "cpp", "go", "rust", "php"]
+    },
+    "primaryLine": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "漏洞点/关注点所在行（片段内相对行，从 1 开始）"
+    },
+    "startLine": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "片段起始绝对行号"
+    },
+    "endLine": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "片段结束绝对行号，必须 >= startLine"
+    },
+    "contextType": {
+      "type": "string",
+      "enum": ["function", "call_chain", "data_flow", "manual"],
+      "description": "上下文类型。function=单函数体；call_chain=跨函数调用链；data_flow=完整污点流；manual=人工/工具指定范围"
+    },
+    "file": {
+      "type": "string",
+      "description": "所属文件路径（主代码所在文件）"
+    },
+    "function": {
+      "type": "string",
+      "description": "所属函数名"
+    },
+    "relatedSnippets": {
+      "type": "array",
+      "description": "跨文件关联片段（contextType 为 call_chain / data_flow 时使用）。例如污点的 source 在 A 文件、sink 在 B 文件，各自一个片段。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "code", "role", "line"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": ["source", "sink", "propagator", "sanitizer"]
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "function": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "code": "String sql = \"SELECT * FROM users WHERE name='\" + username + \"'\";",
+      "language": "java",
+      "primaryLine": 42,
+      "startLine": 38,
+      "endLine": 45,
+      "contextType": "function",
+      "file": "src/controllers/LoginController.java",
+      "function": "login"
+    }
+  ]
+}

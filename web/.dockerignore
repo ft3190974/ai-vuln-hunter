@@ -1,0 +1,19 @@
+# 忽略不需要进镜像的内容
+node_modules
+**/node_modules
+npm-debug.log
+.DS_Store
+
+# 前端构建产物（镜像内会重新构建）
+frontend/dist
+frontend/.vite
+
+# 测试产物
+*.log
+coverage
+.nyc_output
+
+# 编辑器
+.vscode
+.idea
+*.swp

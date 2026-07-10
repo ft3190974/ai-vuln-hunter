@@ -1,0 +1,73 @@
+{
+  "toolId": "ruanan-sast",
+  "scanId": "550e8400-e29b-41d4-a716-446655440000",
+  "scannedAt": "2026-07-07T10:30:00Z",
+  "durationSec": 180,
+  "buildStatus": {
+    "success": true,
+    "buildSystem": "maven"
+  },
+  "findings": [
+    {
+      "ruleId": "RA-SQLI-001",
+      "category": "sqli",
+      "severity": "critical",
+      "message": "SQL 查询使用字符串拼接，存在 SQL 注入风险",
+      "location": {
+        "file": "src/controllers/LoginController.java",
+        "startLine": 42,
+        "endLine": 42,
+        "function": "login"
+      },
+      "snippet": {
+        "code": "String username = request.getParameter(\"name\");\nString pwd = request.getParameter(\"pwd\");\nString sql = \"SELECT * FROM users WHERE name='\" + username + \"' AND pwd='\" + pwd + \"'\";\nStatement stmt = conn.createStatement();\nResultSet rs = stmt.execute(sql);",
+        "language": "java",
+        "primaryLine": 3,
+        "startLine": 40,
+        "endLine": 43,
+        "contextType": "function",
+        "file": "src/controllers/LoginController.java",
+        "function": "login"
+      },
+      "dataFlow": {
+        "sources": [
+          {
+            "file": "LoginController.java",
+            "line": 40,
+            "code": "String username = request.getParameter(\"name\");",
+            "role": "source"
+          }
+        ],
+        "sinks": [
+          {
+            "file": "LoginController.java",
+            "line": 42,
+            "code": "stmt.execute(sql);",
+            "role": "sink"
+          }
+        ],
+        "path": [
+          {
+            "file": "LoginController.java",
+            "line": 40,
+            "code": "String username = request.getParameter(\"name\");",
+            "role": "source"
+          },
+          {
+            "file": "LoginController.java",
+            "line": 42,
+            "code": "String sql = \"...\" + username + \"...\";",
+            "role": "propagator"
+          },
+          {
+            "file": "LoginController.java",
+            "line": 43,
+            "code": "stmt.execute(sql);",
+            "role": "sink"
+          }
+        ]
+      },
+      "confidence": 0.92
+    }
+  ]
+}

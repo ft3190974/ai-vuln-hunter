@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/tool-adapter.schema.json",
+  "title": "ToolAdapter",
+  "description": "工具适配器能力声明与注册信息。每个接入系统的安全工具（软安 SCA/SAST/BAT、Trivy、Semgrep、CodeQL 等）通过适配器注册，声明自身能力，供调度器路由决策。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["toolId", "toolName", "toolType", "version", "capabilities"],
+  "properties": {
+    "toolId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "工具唯一标识，小写+连字符。用于所有引用关系。",
+      "examples": ["ruanan-sca", "ruanan-sast", "ruanan-bat", "semgrep", "trivy"]
+    },
+    "toolName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "展示名称",
+      "examples": ["软安 SCA 源兮", "软安 SAST 静兮", "Semgrep"]
+    },
+    "toolType": { "$ref": "common.schema.json#/$defs/ToolType" },
+    "version": {
+      "type": "string",
+      "description": "工具版本号",
+      "examples": ["2.4.1"]
+    },
+    "vendor": {
+      "type": "string",
+      "description": "工具厂商",
+      "examples": ["ruanan", "open-source"]
+    },
+    "capabilities": {
+      "type": "object",
+      "description": "能力声明（调度器据此选工具：是否支持该语言/架构、是否需编译、能输出什么）",
+      "additionalProperties": false,
+      "required": ["languages", "inputType", "needBuild", "output"],
+      "properties": {
+        "languages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "java", "python", "javascript", "typescript", "c", "cpp", "csharp",
+              "go", "rust", "php", "ruby", "kotlin", "swift", "scala",
+              "arm", "mips", "x86", "x64", "powerpc",
+              "generic"
+            ]
+          },
+          "description": "支持的语言或 CPU 架构。源码工具填语言，BAT 工具填架构。"
+        },
+        "inputType": {
+          "type": "string",
+          "enum": ["source", "binary", "both"],
+          "description": "输入对象类型。源码、二进制或两者皆可。"
+        },
+        "needBuild": {
+          "type": "boolean",
+          "description": "是否需要编译。true=编译型 SAST（如 CodeQL、软安 SAST 静兮），需走编译降级链；false=解析器型（如 Semgrep），零编译依赖。"
+        },
+        "buildSystem": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["maven", "gradle", "npm", "pip", "go", "cargo", "make", "cmake", "msbuild"]
+          },
+          "description": "支持的构建系统（needBuild=true 时有意义）"
+        },
+        "output": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["findings", "sbom", "coverage", "attack_surface", "data_flow"]
+          },
+          "description": "工具能输出的产物类型。findings=漏洞清单；sbom=软件物料清单；coverage=代码覆盖率；attack_surface=暴露面；data_flow=数据流"
+        },
+        "supportsDataFlow": {
+          "type": "boolean",
+          "description": "是否支持污点数据流分析（影响 L3 可达性与深度判定）"
+        },
+        "supportsAsync": {
+          "type": "boolean",
+          "description": "是否支持异步扫描（长时间任务走回调）",
+          "default": false
+        },
+        "maxConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "工具支持的最大并发任务数",
+          "default": 1
+        }
+      }
+    },
+    "endpoints": {
+      "type": "object",
+      "description": "工具调用端点（HTTP/CLI/MCP 形式均可）。MCP 接入时此处填 MCP server 的 tool name。",
+      "additionalProperties": false,
+      "properties": {
+        "scan": {
+          "type": "string",
+          "description": "提交扫描任务的端点或 MCP tool name"
+        },
+        "getStatus": {
+          "type": "string",
+          "description": "查询任务状态"
+        },
+        "getResults": {
+          "type": "string",
+          "description": "获取归一化结果"
+        },
+        "cancel": {
+          "type": "string",
+          "description": "取消任务"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "toolId": "ruanan-sast",
+      "toolName": "软安 SAST 静兮",
+      "toolType": "SAST",
+      "version": "2.4.1",
+      "vendor": "ruanan",
+      "capabilities": {
+        "languages": ["java", "c", "cpp", "python", "go"],
+        "inputType": "source",
+        "needBuild": true,
+        "buildSystem": ["maven", "gradle", "make", "cmake"],
+        "output": ["findings", "data_flow"],
+        "supportsDataFlow": true,
+        "supportsAsync": true,
+        "maxConcurrency": 4
+      },
+      "endpoints": {
+        "scan": "ruanan_sast_scan",
+        "getStatus": "ruanan_sast_status",
+        "getResults": "ruanan_sast_results",
+        "cancel": "ruanan_sast_cancel"
+      }
+    }
+  ]
+}

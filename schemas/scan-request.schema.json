@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/scan-request.schema.json",
+  "title": "ScanRequest",
+  "description": "统一扫描请求。上层 Agent / 编排器通过此结构提交任务，接入层根据 inputType 与 capabilities 路由到合适工具。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scanId", "target", "options"],
+  "properties": {
+    "scanId": { "$ref": "common.schema.json#/$defs/Uuid" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "path"],
+      "properties": {
+        "type": { "$ref": "common.schema.json#/$defs/SourceType" },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "目标本地路径（已挂载到接入层可见位置）或 Git 仓库地址"
+        },
+        "language": {
+          "type": "string",
+          "description": "源码语言（源码场景），如 java/python"
+        },
+        "arch": {
+          "type": "string",
+          "enum": ["arm", "mips", "x86", "x64", "powerpc"],
+          "description": "CPU 架构（固件场景）"
+        },
+        "buildCmd": {
+          "type": "string",
+          "description": "构建命令（编译型 SAST 用，可空）。如 'mvn compile'。若为空且工具 needBuild=true，接入层会探测构建系统或降级。"
+        },
+        "buildSystem": {
+          "type": "string",
+          "enum": ["maven", "gradle", "npm", "pip", "go", "cargo", "make", "cmake", "msbuild", "auto"],
+          "description": "构建系统（可由接入层自动探测，设为 auto）"
+        }
+      }
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["depth", "timeoutSec"],
+      "properties": {
+        "toolIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "指定使用的工具 ID 列表。空数组则由调度器根据 target 自动选工具。"
+        },
+        "categories": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/VulnCategory" },
+          "description": "限定漏洞类别，如只查 SQL 注入和越权"
+        },
+        "severityThreshold": {
+          "$ref": "common.schema.json#/$defs/Severity",
+          "description": "最低严重度阈值，低于此级别的忽略"
+        },
+        "depth": {
+          "type": "string",
+          "enum": ["fast", "normal", "deep"],
+          "description": "扫描深度。fast=只跑快速工具（Semgrep/Trivy）；normal=加 SAST；deep=全量含 LLM 推理与验证"
+        },
+        "timeoutSec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "超时时间（秒）"
+        },
+        "enableReachability": {
+          "type": "boolean",
+          "description": "是否启用 SCA 可达性分析（仅 SCA 工具时有效）",
+          "default": true
+        },
+        "enableVerification": {
+          "type": "boolean",
+          "description": "是否启用沙箱验证（deep 模式默认 true）",
+          "default": false
+        }
+      }
+    },
+    "callback": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "异步回调配置（工具支持异步时使用）",
+      "properties": {
+        "webhook": {
+          "type": "string",
+          "format": "uri",
+          "description": "结果回调 URL"
+        },
+        "authHeader": {
+          "type": "string",
+          "description": "回调鉴权头（避免明文存储敏感信息）"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "scanId": "550e8400-e29b-41d4-a716-446655440000",
+      "createdAt": "2026-07-07T10:00:00Z",
+      "target": {
+        "type": "source",
+        "path": "/workspace/projects/payment-service",
+        "language": "java",
+        "buildSystem": "maven",
+        "buildCmd": "mvn compile -DskipTests"
+      },
+      "options": {
+        "toolIds": ["ruanan-sast", "ruanan-sca", "semgrep"],
+        "categories": ["sqli", "authz", "business_logic"],
+        "depth": "deep",
+        "timeoutSec": 3600,
+        "enableReachability": true,
+        "enableVerification": true
+      }
+    }
+  ]
+}

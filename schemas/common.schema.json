@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/common.schema.json",
+  "title": "Common Shared Types",
+  "description": "共享类型定义，被其他 schema 通过 $ref 引用。集中定义避免重复，保证一致性。",
+  "$defs": {
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "description": "非空字符串"
+    },
+
+    "IsoTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 时间戳，如 2026-07-07T10:00:00Z",
+      "examples": ["2026-07-07T10:00:00Z"]
+    },
+
+    "Uuid": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4，用作全局唯一标识"
+    },
+
+    "Severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low", "info"],
+      "description": "严重度分级（CVSS 对齐）。critical=9.0-10, high=7.0-8.9, medium=4.0-6.9, low=0.1-3.9, info=0",
+      "examples": ["critical", "high"]
+    },
+
+    "VulnCategory": {
+      "type": "string",
+      "enum": [
+        "sqli",
+        "cmdi",
+        "xss",
+        "path_traversal",
+        "ssrf",
+        "overflow",
+        "uaf",
+        "double_free",
+        "fmt_string",
+        "integer_overflow",
+        "authz",
+        "authn",
+        "idor",
+        "business_logic",
+        "crypto_weak",
+        "hardcoded_secret",
+        "config",
+        "deserialization",
+        "race_condition",
+        "csrf",
+        "xxe",
+        "redirect",
+        "unknown"
+      ],
+      "description": "漏洞类别归一化枚举（对齐 CWE）。新增类别需同时更新 finding.schema.json 与 rule.schema.json。",
+      "examples": ["sqli", "business_logic"]
+    },
+
+    "ToolType": {
+      "type": "string",
+      "enum": ["SCA", "SAST", "BAT", "FUZZ", "DAST", "IAST"],
+      "description": "安全工具类型"
+    },
+
+    "SourceType": {
+      "type": "string",
+      "enum": ["source", "binary"],
+      "description": "分析对象类型"
+    },
+
+    "Confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "置信度，0 到 1 之间",
+      "examples": [0.92]
+    },
+
+    "Location": {
+      "type": "object",
+      "description": "代码/二进制位置（源码与二进制统一表达）",
+      "additionalProperties": false,
+      "required": ["targetType"],
+      "properties": {
+        "targetType": { "$ref": "#/$defs/SourceType" },
+        "file": {
+          "type": "string",
+          "description": "源码文件相对路径（源码场景）"
+        },
+        "binary": {
+          "type": "string",
+          "description": "二进制路径（固件场景）"
+        },
+        "function": {
+          "type": "string",
+          "description": "所在函数名"
+        },
+        "startLine": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "起始行（源码场景）"
+        },
+        "endLine": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "结束行（源码场景）"
+        },
+        "startCol": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "endCol": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "address": {
+          "type": "string",
+          "description": "二进制地址（固件场景），如 0x4010a0"
+        }
+      }
+    },
+
+    "FlowPoint": {
+      "type": "object",
+      "description": "数据流中的一个节点（source/sink/sanitizer/propagator）",
+      "additionalProperties": false,
+      "required": ["file", "line", "code", "role"],
+      "properties": {
+        "file": { "$ref": "#/$defs/NonEmptyString" },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "function": { "type": "string" },
+        "code": {
+          "type": "string",
+          "description": "该行代码文本"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["source", "sink", "sanitizer", "propagator"]
+        }
+      }
+    },
+
+    "ToolSource": {
+      "type": "object",
+      "description": "Finding 的来源记录（多工具命中同一漏洞点时合并为一条 Finding，每条来源记一条 ToolSource）",
+      "additionalProperties": false,
+      "required": ["toolId", "toolType", "toolConfidence", "reportedAt"],
+      "properties": {
+        "toolId": {
+          "type": "string",
+          "description": "工具唯一标识，如 ruanan-sast / semgrep / trivy",
+          "examples": ["ruanan-sast", "semgrep"]
+        },
+        "toolType": { "$ref": "#/$defs/ToolType" },
+        "rawRuleId": {
+          "type": "string",
+          "description": "工具内部原始规则 ID（用于学习与回填）"
+        },
+        "toolConfidence": { "$ref": "#/$defs/Confidence" },
+        "reportedAt": { "$ref": "#/$defs/IsoTimestamp" }
+      }
+    },
+
+    "Error": {
+      "type": "object",
+      "description": "标准化错误对象",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "错误码，大写下划线",
+          "examples": ["BUILD_FAILED", "TOOL_TIMEOUT", "SCHEMA_INVALID"]
+        },
+        "message": {
+          "type": "string",
+          "description": "人类可读的错误描述"
+        },
+        "toolId": { "type": "string" },
+        "details": {
+          "type": "object",
+          "description": "附加细节（自由结构）"
+        }
+      }
+    }
+  }
+}

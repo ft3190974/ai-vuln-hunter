@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/rule.schema.json",
+  "title": "Rule",
+  "description": "判定规则 DSL。支持两种形态：(1) 结构化规则（确定性判定，零幻觉，可由 OPA/Semgrep 执行）；(2) 自然语言规则（喂 LLM 的 prompt 模板，半结构化）。规则可热加载、版本化、灰度发布。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ruleId", "name", "type", "category", "severity", "enabled", "version"],
+  "properties": {
+    "ruleId": {
+      "type": "string",
+      "pattern": "^[A-Z]+(-[A-Z0-9]+)+-[0-9]{3}$",
+      "description": "规则唯一 ID，格式 类别-子类-序号，如 BL-ORDER-001（业务逻辑-订单-001）",
+      "examples": ["BL-ORDER-001", "INJ-SQLI-014"]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "规则名称"
+    },
+    "description": {
+      "type": "string",
+      "description": "规则说明"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["structured", "llm_prompt"],
+      "description": "规则形态。structured=结构化规则（确定性）；llm_prompt=自然语言 prompt 模板（半结构化）"
+    },
+    "category": { "$ref": "common.schema.json#/$defs/VulnCategory" },
+    "severity": { "$ref": "common.schema.json#/$defs/Severity" },
+    "cwe": {
+      "type": "string",
+      "pattern": "^CWE-[0-9]+$"
+    },
+    "languages": {
+      "type": "array",
+      "description": "适用语言（空表示语言无关）",
+      "items": { "type": "string" }
+    },
+
+    "source": {
+      "type": "array",
+      "description": "污点源（输入点）",
+      "items": { "type": "string" },
+      "examples": ["http.param.amount", "http.body.price"]
+    },
+    "sink": {
+      "type": "array",
+      "description": "危险点（漏洞触发函数/方法）",
+      "items": { "type": "string" },
+      "examples": ["order.setAmount()", "payment.charge()"]
+    },
+
+    "condition": {
+      "type": "object",
+      "description": "判定条件（结构化规则用）",
+      "additionalProperties": true,
+      "properties": {
+        "pathExists": {
+          "type": "boolean",
+          "description": "要求 source 到 sink 的路径存在"
+        },
+        "hasValidation": {
+          "type": "object",
+          "description": "校验是否存在（若期望存在但缺失则命中规则）",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["range", "type", "length", "regex", "whitelist", "auth"]
+            },
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "pattern": { "type": "string" },
+            "expect": {
+              "type": "boolean",
+              "description": "期望存在(true)还是缺失(false)才命中"
+            }
+          }
+        }
+      }
+    },
+
+    "trigger": {
+      "type": "array",
+      "description": "POC 触发序列（结构化规则用，可直接转 POC）",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "sendRequest": { "type": "object" },
+          "assert": { "type": "object" }
+        }
+      }
+    },
+
+    "llmPrompt": {
+      "type": "string",
+      "description": "LLM prompt 模板（llm_prompt 类型用）。支持 {code} {context} {cve} 等占位符，运行时由 Agent 填充。",
+      "examples": [
+        "分析以下状态机相关代码，判断是否存在缺陷：\n1. 状态迁移未校验当前状态\n2. 缺少幂等性保护\n3. 跨用户状态污染\n代码：{code}\n调用上下文：{context}"
+      ]
+    },
+    "evidenceRequired": {
+      "type": "array",
+      "description": "LLM 判定必须提供的证据（约束 LLM 不能空口下结论）",
+      "items": { "type": "string" },
+      "examples": ["必须给出两步攻击序列", "必须指出漏洞点行号"]
+    },
+
+    "falsePositiveFilters": {
+      "type": "array",
+      "description": "误报过滤器（命中即降级或丢弃，避免幻觉放大）",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pattern", "action"],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "匹配模式（正则）。命中此模式表示是已知安全模式。"
+          },
+          "action": {
+            "type": "string",
+            "enum": ["drop", "downgrade"],
+            "description": "drop=直接丢弃；downgrade=降级严重度"
+          }
+        }
+      }
+    },
+
+    "confidenceBoost": {
+      "$ref": "common.schema.json#/$defs/Confidence",
+      "description": "规则命中时的置信度加成（0-1）"
+    },
+
+    "enabled": {
+      "type": "boolean",
+      "description": "是否启用",
+      "default": true
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "语义化版本号，用于灰度发布与追溯",
+      "examples": ["1.2.0"]
+    },
+    "rolloutPercent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "灰度比例（0-100）。新规则先小流量试跑，验证误报率后再全量。",
+      "default": 100
+    },
+    "author": { "type": "string" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "标签，便于规则市场分类"
+    }
+  },
+  "examples": [
+    {
+      "ruleId": "BL-ORDER-001",
+      "name": "订单金额篡改-未校验负数",
+      "description": "订单金额未校验非负，可构造负数金额套利",
+      "type": "structured",
+      "category": "business_logic",
+      "severity": "critical",
+      "languages": ["java", "python", "go"],
+      "source": ["http.param.amount", "http.body.price"],
+      "sink": ["order.setAmount()", "payment.charge()"],
+      "condition": {
+        "pathExists": true,
+        "hasValidation": { "type": "range", "min": 0, "expect": false }
+      },
+      "trigger": [
+        { "sendRequest": { "method": "POST", "path": "/api/order", "body": { "amount": -1 } } },
+        { "assert": { "response.status": 200, "db.balance_changed": true } }
+      ],
+      "falsePositiveFilters": [
+        { "pattern": "@Min\\(0\\)", "action": "drop" }
+      ],
+      "confidenceBoost": 0.9,
+      "enabled": true,
+      "version": "1.0.0",
+      "rolloutPercent": 100,
+      "author": "security-team",
+      "createdAt": "2026-07-07T10:00:00Z",
+      "tags": ["business", "payment"]
+    },
+    {
+      "ruleId": "BL-STATE-002",
+      "name": "状态机绕过",
+      "type": "llm_prompt",
+      "category": "business_logic",
+      "severity": "high",
+      "llmPrompt": "分析以下状态机相关代码，判断是否存在缺陷：\n1. 状态迁移未校验当前状态（已取消订单仍能发货）\n2. 缺少幂等性保护\n3. 跨用户状态污染\n代码：{code}\n调用上下文：{context}",
+      "evidenceRequired": ["必须给出两步攻击序列", "必须指出漏洞点行号"],
+      "enabled": true,
+      "version": "1.0.0",
+      "tags": ["business", "state-machine"]
+    }
+  ]
+}

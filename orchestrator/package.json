@@ -1,0 +1,19 @@
+{
+  "name": "orchestrator",
+  "version": "1.1.0",
+  "description": "AI 漏洞挖掘应用的\"大脑\"——以状态机驱动多类 Agent 协同，含统一 MCP server（编排+工具接入）。",
+  "main": "engine.js",
+  "scripts": {
+    "test": "node test-orchestrator.js",
+    "test:mcp": "node test-mcp.js",
+    "start:mcp": "node mcp-server.js"
+  },
+  "keywords": ["mcp", "orchestrator", "vulnerability", "agent"],
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/sca-output.schema.json",
+  "title": "ScaOutput",
+  "description": "SCA 工具归一化输出。SCA（如软安 SCA 源兮、Trivy）负责组件分析与已知 CVE 命中。关键产物：依赖清单(SBOM)、组件级漏洞清单、脆弱函数清单（后者驱动可达性分析）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["toolId", "scanId", "scannedAt", "sbom", "vulnerabilities"],
+  "properties": {
+    "toolId": {
+      "type": "string",
+      "description": "产出此结果的工具 ID",
+      "examples": ["ruanan-sca", "trivy"]
+    },
+    "scanId": {
+      "type": "string",
+      "description": "对应的扫描任务 ID"
+    },
+    "scannedAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "durationSec": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sbom": {
+      "type": "object",
+      "description": "软件物料清单",
+      "additionalProperties": false,
+      "required": ["packages"],
+      "properties": {
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version", "ecosystem"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 },
+              "ecosystem": {
+                "type": "string",
+                "enum": ["npm", "pypi", "maven", "go", "cargo", "nuget", "composer", "gem", "conan", "other"],
+                "description": "包生态"
+              },
+              "direct": {
+                "type": "boolean",
+                "description": "是否直接依赖（false 为传递依赖）"
+              },
+              "path": {
+                "type": "array",
+                "description": "依赖路径（从根到该包）",
+                "items": { "type": "string" }
+              },
+              "license": {
+                "type": "string",
+                "description": "许可证"
+              }
+            }
+          }
+        }
+      }
+    },
+    "vulnerabilities": {
+      "type": "array",
+      "description": "组件级漏洞清单",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cve", "package", "severity", "source"],
+        "properties": {
+          "cve": {
+            "type": "string",
+            "pattern": "^(CVE|GHSA|OSV)-[0-9a-zA-Z-]+$",
+            "description": "漏洞编号（CVE/GHSA/OSV）"
+          },
+          "package": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" }
+            }
+          },
+          "severity": { "$ref": "common.schema.json#/$defs/Severity" },
+          "cvss": { "type": "string" },
+          "vulnerableFunctions": {
+            "type": "array",
+            "description": "★ 脆弱函数清单。可达性分析的关键输入——LLM/joern 据此判断用户代码是否调用到这些函数。",
+            "items": { "type": "string" },
+            "examples": ["fn_parse", "ObjectInputStream.readObject"]
+          },
+          "fixedVersion": {
+            "type": "string",
+            "description": "已修复版本"
+          },
+          "source": {
+            "type": "string",
+            "description": "数据来源工具",
+            "examples": ["ruanan-sca", "trivy"]
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "toolId": "ruanan-sca",
+      "scanId": "550e8400-e29b-41d4-a716-446655440000",
+      "scannedAt": "2026-07-07T10:05:00Z",
+      "durationSec": 42,
+      "sbom": {
+        "packages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.0",
+            "ecosystem": "maven",
+            "direct": true,
+            "path": ["payment-service", "log4j-core"]
+          }
+        ]
+      },
+      "vulnerabilities": [
+        {
+          "cve": "CVE-2021-44228",
+          "package": { "name": "log4j-core", "version": "2.14.0" },
+          "severity": "critical",
+          "cvss": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "vulnerableFunctions": ["JndiLookup.lookup", "MessagePatternConverter"],
+          "fixedVersion": "2.17.1",
+          "source": "ruanan-sca"
+        }
+      ]
+    }
+  ]
+}

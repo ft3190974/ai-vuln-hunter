@@ -1,0 +1,95 @@
+# web/docker-compose.yml — 一键编排（应用 + Postgres + Neo4j）
+#
+# 用法：
+#   cd web
+#   docker compose up -d                    # 启动全部服务（默认内存存储 + 免认证）
+#   docker compose logs -f ai-vuln-hunter   # 看应用日志
+#   docker compose down                     # 停止
+#
+# 启用持久化 + 认证：
+#   DB_MODE=postgres+neo4j AUTH_ENABLED=1 JWT_SECRET=xxx docker compose --profile db up -d
+#
+# 自定义 LLM/沙箱：
+#   LLM_MODE=glm GLM_API_KEY=xxx docker compose up -d
+
+services:
+  # ── 主应用 ──
+  ai-vuln-hunter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-vuln-hunter:latest
+    container_name: ai-vuln-hunter
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      - LLM_MODE=${LLM_MODE:-mock}
+      - GLM_BASE_URL=${GLM_BASE_URL:-}
+      - GLM_API_KEY=${GLM_API_KEY:-}
+      - SANDBOX_MODE=${SANDBOX_MODE:-mock}
+      - VULNDB_LIVE=${VULNDB_LIVE:-0}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      # 持久化（默认 memory；启用 db profile 时用下面的连接串）
+      - DB_MODE=${DB_MODE:-memory}
+      - DATABASE_URL=postgres://avh:avhpass@postgres:5432/ai_vuln_hunter
+      - NEO4J_URL=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-avhneo4j}
+      # 认证（默认关闭）
+      - AUTH_ENABLED=${AUTH_ENABLED:-0}
+      - JWT_SECRET=${JWT_SECRET:-}
+      # 可观测性
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=${NODE_ENV:-production}
+    volumes:
+      - vuln-db-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      neo4j:
+        condition: service_started
+        required: false
+    restart: unless-stopped
+
+  # ── Postgres（profiles: db，默认不启动，用 --profile db 启用）──
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["db"]
+    container_name: ai-vuln-hunter-postgres
+    environment:
+      - POSTGRES_USER=avh
+      - POSTGRES_PASSWORD=avhpass
+      - POSTGRES_DB=ai_vuln_hunter
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      # 启动时自动跑迁移（migrate.js 在镜像内）
+      - ../migrations:/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avh -d ai_vuln_hunter"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Neo4j（profiles: db）──
+  neo4j:
+    image: neo4j:5-community
+    profiles: ["db"]
+    container_name: ai-vuln-hunter-neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-avhneo4j}
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "${NEO4J_BOLT:-7687}:7687"
+      - "${NEO4J_HTTP:-7474}:7474"
+    volumes:
+      - neo4j-data:/data
+    restart: unless-stopped
+
+volumes:
+  vuln-db-data:
+  pg-data:
+  neo4j-data:

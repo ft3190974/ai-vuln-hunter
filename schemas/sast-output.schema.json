@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/sast-output.schema.json",
+  "title": "SastOutput",
+  "description": "SAST 工具归一化输出。SAST（如软安 SAST 静兮、Semgrep、CodeQL）负责源码级缺陷检测。关键产物：findings 列表，每条携带 snippet（代码片段）与 dataFlow（污点流），供 LLM 深度判定与误报过滤。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["toolId", "scanId", "scannedAt", "findings"],
+  "properties": {
+    "toolId": {
+      "type": "string",
+      "examples": ["ruanan-sast", "semgrep", "codeql"]
+    },
+    "scanId": { "type": "string" },
+    "scannedAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "durationSec": { "type": "integer", "minimum": 0 },
+    "buildStatus": {
+      "type": "object",
+      "description": "构建状态（编译型 SAST 用，对应方案第十章编译降级）",
+      "additionalProperties": false,
+      "required": ["success"],
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "是否成功构建。false 触发降级链（joern → Semgrep → tree-sitter）"
+        },
+        "buildSystem": { "type": "string" },
+        "errorMessage": { "type": "string" },
+        "downgradedTo": {
+          "type": "string",
+          "description": "降级后实际使用的工具 ID",
+          "examples": ["semgrep"]
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["ruleId", "category", "severity", "message", "location", "snippet"],
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "description": "工具内部规则 ID（用于学习与规则回填）"
+          },
+          "category": { "$ref": "common.schema.json#/$defs/VulnCategory" },
+          "severity": { "$ref": "common.schema.json#/$defs/Severity" },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "工具给出的告警信息"
+          },
+          "location": {
+            "type": "object",
+            "description": "漏洞位置（SAST 专用的源码位置）",
+            "additionalProperties": false,
+            "required": ["file", "startLine", "endLine"],
+            "properties": {
+              "file": { "type": "string", "minLength": 1 },
+              "startLine": { "type": "integer", "minimum": 1 },
+              "endLine": { "type": "integer", "minimum": 1 },
+              "startCol": { "type": "integer", "minimum": 1 },
+              "endCol": { "type": "integer", "minimum": 1 },
+              "function": { "type": "string" }
+            }
+          },
+          "snippet": {
+            "$ref": "code-snippet.schema.json",
+            "description": "★ 代码片段，LLM 深度判定与误报过滤的必需输入"
+          },
+          "dataFlow": {
+            "type": "object",
+            "description": "污点流（工具支持时提供，supportsDataFlow=true 的工具）",
+            "additionalProperties": false,
+            "properties": {
+              "sources": {
+                "type": "array",
+                "items": { "$ref": "common.schema.json#/$defs/FlowPoint" }
+              },
+              "sinks": {
+                "type": "array",
+                "items": { "$ref": "common.schema.json#/$defs/FlowPoint" }
+              },
+              "path": {
+                "type": "array",
+                "items": { "$ref": "common.schema.json#/$defs/FlowPoint" }
+              }
+            }
+          },
+          "confidence": { "$ref": "common.schema.json#/$defs/Confidence" },
+          "rawRule": {
+            "type": "object",
+            "description": "工具原始规则对象（用于学习 Agent 反推生成新规则）"
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "toolId": "ruanan-sast",
+      "scanId": "550e8400-e29b-41d4-a716-446655440000",
+      "scannedAt": "2026-07-07T10:30:00Z",
+      "durationSec": 180,
+      "buildStatus": { "success": true, "buildSystem": "maven" },
+      "findings": [
+        {
+          "ruleId": "RA-SQLI-001",
+          "category": "sqli",
+          "severity": "critical",
+          "message": "SQL 查询使用字符串拼接，存在 SQL 注入风险",
+          "location": {
+            "file": "src/controllers/LoginController.java",
+            "startLine": 42,
+            "endLine": 42,
+            "function": "login"
+          },
+          "snippet": {
+            "code": "String sql = \"SELECT * FROM users WHERE name='\" + username + \"'\";",
+            "language": "java",
+            "primaryLine": 42,
+            "startLine": 38,
+            "endLine": 45,
+            "contextType": "function",
+            "file": "src/controllers/LoginController.java",
+            "function": "login"
+          },
+          "dataFlow": {
+            "sources": [
+              {
+                "file": "LoginController.java",
+                "line": 40,
+                "code": "String username = request.getParameter(\"name\");",
+                "role": "source"
+              }
+            ],
+            "sinks": [
+              {
+                "file": "LoginController.java",
+                "line": 42,
+                "code": "stmt.execute(sql);",
+                "role": "sink"
+              }
+            ],
+            "path": []
+          },
+          "confidence": 0.92
+        }
+      ]
+    }
+  ]
+}

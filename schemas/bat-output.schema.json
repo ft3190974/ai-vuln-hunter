@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/bat-output.schema.json",
+  "title": "BatOutput",
+  "description": "BAT 工具归一化输出。BAT（如软安 BAT 固兮）负责二进制/固件级检测。关键产物：findings（含反汇编/伪码片段）、暴露面信息。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["toolId", "scanId", "scannedAt", "findings"],
+  "properties": {
+    "toolId": {
+      "type": "string",
+      "examples": ["ruanan-bat", "ghidra", "binwalk"]
+    },
+    "scanId": { "type": "string" },
+    "scannedAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "durationSec": { "type": "integer", "minimum": 0 },
+    "firmwareInfo": {
+      "type": "object",
+      "description": "固件元信息",
+      "additionalProperties": false,
+      "properties": {
+        "filename": { "type": "string" },
+        "arch": { "type": "string", "examples": ["arm", "mips", "x86"] },
+        "endian": { "type": "string", "enum": ["little", "big"] },
+        "format": { "type": "string", "examples": ["ELF", "PE", "SquashFS"] },
+        "rootfs": { "type": "string", "description": "提取出的根文件系统路径" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "severity", "binary", "evidence"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "hardcoded_secret",
+              "weak_crypto",
+              "debug_interface",
+              "backdoor",
+              "buffer_overflow",
+              "format_string",
+              "insecure_update",
+              "insecure_comm",
+              "config",
+              "other"
+            ],
+            "description": "二进制层面漏洞类别"
+          },
+          "severity": { "$ref": "common.schema.json#/$defs/Severity" },
+          "binary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "arch": { "type": "string" },
+              "format": { "type": "string" }
+            }
+          },
+          "location": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "function": { "type": "string" },
+              "address": { "type": "string", "description": "十六进制地址，如 0x4010a0" }
+            }
+          },
+          "snippet": {
+            "type": "object",
+            "description": "反汇编/伪码片段",
+            "additionalProperties": false,
+            "required": ["code", "type"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "type": {
+                "type": "string",
+                "enum": ["disasm", "pseudocode", "hex"],
+                "description": "片段类型：反汇编/伪码/十六进制"
+              },
+              "startLine": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "description": "工具判定依据（为什么判定为漏洞）"
+          }
+        }
+      }
+    },
+    "attackSurface": {
+      "type": "object",
+      "description": "暴露面信息",
+      "additionalProperties": false,
+      "properties": {
+        "interfaces": {
+          "type": "array",
+          "description": "暴露的接口/端点",
+          "items": { "type": "string" },
+          "examples": ["telnet", "ssh", "http-admin", "upnp"]
+        },
+        "ports": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        },
+        "protocols": {
+          "type": "array",
+          "items": { "type": "string" },
+          "examples": ["HTTP", "HTTPS", "TR-069", "UPnP"]
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "toolId": "ruanan-bat",
+      "scanId": "550e8400-e29b-41d4-a716-446655440000",
+      "scannedAt": "2026-07-07T11:00:00Z",
+      "durationSec": 600,
+      "firmwareInfo": {
+        "filename": "firmware.bin",
+        "arch": "arm",
+        "endian": "little",
+        "format": "SquashFS",
+        "rootfs": "/workspace/extracted/squashfs-root"
+      },
+      "findings": [
+        {
+          "category": "hardcoded_secret",
+          "severity": "high",
+          "binary": {
+            "path": "/usr/bin/httpd",
+            "arch": "arm",
+            "format": "ELF"
+          },
+          "location": { "function": "init_admin", "address": "0x4010a0" },
+          "snippet": {
+            "code": "MOV R0, #0x70617373 ; 'pass'",
+            "type": "disasm",
+            "startLine": 1
+          },
+          "evidence": "发现硬编码字符串 'pass'，疑似默认管理员口令"
+        }
+      ],
+      "attackSurface": {
+        "interfaces": ["http-admin", "telnet"],
+        "ports": [80, 443, 23],
+        "protocols": ["HTTP", "HTTPS", "TR-069"]
+      }
+    }
+  ]
+}

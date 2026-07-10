@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-vuln-hunter/schemas/finding.schema.json",
+  "title": "Finding",
+  "description": "统一漏洞对象。系统内部流转的唯一漏洞数据结构，所有工具结果、Agent 判定、验证结果、修复结果都挂载到此对象。设计为可演进 schema，新增字段向后兼容。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "findingId", "title", "category", "severity",
+    "description", "location", "sources", "confidence", "status"
+  ],
+  "properties": {
+    "findingId": {
+      "type": "string",
+      "pattern": "^F-[0-9]{4}-[0-9]{6}$",
+      "description": "系统全局唯一 ID，格式 F-YYYY-NNNNNN",
+      "examples": ["F-2026-000123"]
+    },
+    "createdAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" },
+
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "漏洞标题"
+    },
+    "category": { "$ref": "common.schema.json#/$defs/VulnCategory" },
+    "severity": { "$ref": "common.schema.json#/$defs/Severity" },
+    "cvss": {
+      "type": "string",
+      "pattern": "^CVSS:3.[01]/[A-Z]:[A-Z]",
+      "description": "CVSS v3.x 向量字符串",
+      "examples": ["CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"]
+    },
+    "cvssScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "CVSS 分数"
+    },
+    "cwe": {
+      "type": "string",
+      "pattern": "^CWE-[0-9]+$",
+      "description": "CWE 编号",
+      "examples": ["CWE-89"]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "漏洞详细描述"
+    },
+
+    "location": { "$ref": "common.schema.json#/$defs/Location" },
+
+    "snippet": {
+      "$ref": "code-snippet.schema.json",
+      "description": "漏洞点代码片段（LLM 判定与修复的核心输入）"
+    },
+
+    "fullContext": {
+      "type": "string",
+      "description": "完整文件/输入的源代码上下文（供前端展示漏洞在整体代码中的位置）"
+    },
+
+    "exploitability": {
+      "type": "object",
+      "description": "可利用性评估（LLM 产出，让用户理解漏洞利用难度与前置条件）",
+      "properties": {
+        "difficulty": { "type": "string", "enum": ["low", "medium", "high", "unknown"] },
+        "prerequisites": { "type": "string", "description": "利用所需前置条件" },
+        "accessNeeded": { "type": "string", "description": "攻击者所需权限" }
+      }
+    },
+
+    "impact": {
+      "type": "object",
+      "description": "影响评估（LLM 产出，说明受影响资产与最坏后果）",
+      "properties": {
+        "assets": { "type": "string", "description": "受影响的资产/数据/业务" },
+        "worstCase": { "type": "string", "description": "最坏后果" },
+        "remote": { "type": "boolean", "description": "是否可远程利用" },
+        "noAuth": { "type": "boolean", "description": "是否无需认证即可利用" }
+      }
+    },
+
+    "dataFlow": {
+      "type": "object",
+      "description": "污点数据流（工具支持时提供）",
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/FlowPoint" }
+        },
+        "sinks": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/FlowPoint" }
+        },
+        "path": {
+          "type": "array",
+          "description": "完整的污点传播路径（按顺序排列的节点）",
+          "items": { "$ref": "common.schema.json#/$defs/FlowPoint" }
+        }
+      }
+    },
+
+    "reachability": {
+      "type": "object",
+      "description": "SCA 可达性分析结果（组件漏洞专用，对应方案第八章四级分层）",
+      "additionalProperties": false,
+      "required": ["level", "reachable"],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "可达性级别。0=未分析，1=包级(import)，2=函数级(调用图)，3=语义级(LLM判断)，4=动态级(沙箱确认)"
+        },
+        "reachable": {
+          "type": "boolean",
+          "description": "最终是否可达（综合各级判断）"
+        },
+        "evidence": {
+          "type": "string",
+          "description": "判定依据/证据"
+        },
+        "verifiedBy": {
+          "type": "string",
+          "enum": ["static", "llm", "sandbox"],
+          "description": "由哪种方式验证：静态分析/LLM 语义判断/沙箱动态"
+        },
+        "analyzedAt": { "$ref": "common.schema.json#/$defs/IsoTimestamp" }
+      }
+    },
+
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Finding 的来源列表。多工具命中同一漏洞点时合并为一条 Finding，每条来源记一个 ToolSource。",
+      "items": { "$ref": "common.schema.json#/$defs/ToolSource" }
+    },
+    "confidence": { "$ref": "common.schema.json#/$defs/Confidence" },
+
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "confirmed", "false_positive", "fixed", "wont_fix"],
+      "description": "漏洞生命周期状态。candidate=候选；confirmed=已确认；false_positive=误报；fixed=已修复；wont_fix=不修复",
+      "default": "candidate"
+    },
+    "reviewerNote": {
+      "type": "string",
+      "description": "人工/Agent 标注说明"
+    },
+
+    "relatedFindings": {
+      "type": "array",
+      "description": "关联 Finding ID（变种/同源/绕过关系）",
+      "items": { "type": "string" }
+    },
+    "linkedCves": {
+      "type": "array",
+      "description": "关联的 CVE 列表",
+      "items": {
+        "type": "string",
+        "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$"
+      }
+    },
+    "isZeroDay": {
+      "type": "boolean",
+      "description": "是否为 0-day（非已知 CVE 的变种挖掘结果）",
+      "default": false
+    },
+    "businessContext": {
+      "type": "object",
+      "description": "业务上下文（业务逻辑漏洞专用）",
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string",
+          "description": "受影响资产，如 order/payment/coupon"
+        },
+        "attackScenario": {
+          "type": "string",
+          "description": "攻击场景描述"
+        },
+        "stateMachineViolation": {
+          "type": "string",
+          "description": "状态机违规点（如 已取消订单仍能发货）"
+        }
+      }
+    },
+
+    "pocId": {
+      "type": "string",
+      "description": "关联的 POC ID（验证通过后填充）"
+    },
+    "poc": {
+      "type": "object",
+      "description": "POC 完整内容（含沙箱验证结果，前端展示用）",
+      "properties": {
+        "vulnType": { "type": "string" },
+        "entry": { "type": "string" },
+        "payload": { "type": "string" },
+        "precondition": { "type": "string" },
+        "expected": { "type": "string" },
+        "sandboxVerified": { "type": "boolean" },
+        "sandboxEvidence": { "type": "string" },
+        "confidence": { "type": "number" }
+      }
+    },
+    "patchId": {
+      "type": "string",
+      "description": "关联的修复 patch ID"
+    },
+    "patch": {
+      "type": "object",
+      "description": "修复 patch 完整内容（前端展示用）",
+      "properties": {
+        "code": { "type": "string" },
+        "strategy": { "type": "string" },
+        "riskLevel": { "type": "string" },
+        "rationale": { "type": "string" },
+        "equivalenceCheck": { "type": "boolean" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "findingId": "F-2026-000123",
+      "createdAt": "2026-07-07T10:00:00Z",
+      "title": "登录接口 SQL 注入（拼接式）",
+      "category": "sqli",
+      "severity": "critical",
+      "cwe": "CWE-89",
+      "description": "用户名参数未参数化直接拼接到 SQL 语句",
+      "location": {
+        "targetType": "source",
+        "file": "src/controllers/LoginController.java",
+        "function": "login",
+        "startLine": 42,
+        "endLine": 42
+      },
+      "snippet": {
+        "code": "String sql = \"SELECT * FROM users WHERE name='\" + username + \"'\";",
+        "language": "java",
+        "primaryLine": 42,
+        "startLine": 38,
+        "endLine": 45,
+        "contextType": "function",
+        "file": "src/controllers/LoginController.java",
+        "function": "login"
+      },
+      "dataFlow": {
+        "sources": [
+          {
+            "file": "LoginController.java",
+            "line": 40,
+            "code": "String username = request.getParameter(\"name\");",
+            "role": "source"
+          }
+        ],
+        "sinks": [
+          {
+            "file": "LoginController.java",
+            "line": 42,
+            "code": "stmt.execute(sql);",
+            "role": "sink"
+          }
+        ],
+        "path": []
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "evidence": "沙箱 POC 执行返回 admin token",
+        "verifiedBy": "sandbox"
+      },
+      "sources": [
+        {
+          "toolId": "ruanan-sast",
+          "toolType": "SAST",
+          "rawRuleId": "RA-SQLI-001",
+          "toolConfidence": 0.92,
+          "reportedAt": "2026-07-07T10:00:00Z"
+        }
+      ],
+      "confidence": 0.95,
+      "status": "confirmed",
+      "linkedCves": ["CVE-2023-1234"],
+      "pocId": "POC-2026-000123",
+      "patchId": "PATCH-2026-000123"
+    }
+  ]
+}
