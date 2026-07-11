@@ -15,6 +15,8 @@ const config = require("../config");
 const { getLlm } = require("../llm");
 const { sliceSource } = require("./code-slicer");
 const { BUSINESS_VULN_TYPES, HIGH_RISK_TYPES } = require("./business-rules");
+const { scanDependencies } = require("./dependency-scanner");
+const { matchKnownVulns } = require("./cve-matcher");
 
 /**
  * 判断一个 slice 是否值得用某条规则深查
