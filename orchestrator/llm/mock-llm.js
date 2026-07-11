@@ -37,6 +37,28 @@ class MockLlm extends ILlm {
       // ★ C/C++ 专用漏洞挖掘（c-hunter）—— 必须在通用"分析代码"分支之前
       structured = analyzeCCodeForMock(prompt);
       text = JSON.stringify(structured);
+    } else if ((lower.includes("变体") || lower.includes("变种") || lower.includes("0-day") || lower.includes("0day") || lower.includes("语义变体")) && !lower.includes("单元测试")) {
+      // ★ 0-day 变种推理 —— 提前到攻击场景之前（prompt 可能含"攻击路径"关键词）
+      structured = {
+        variants: [
+          {
+            description: "变种1：source 改为 JSON body 字段",
+            newSource: "http.body.data",
+            newSink: "JSON.parse → 动态字段访问",
+            reachable: true,
+            confidence: 0.7,
+          },
+          {
+            description: "变种2：绕过 WAF 的编码变体",
+            newSource: "http.header.X-Forwarded-For",
+            newSink: "原始接口",
+            reachable: true,
+            confidence: 0.65,
+          },
+        ],
+        confidence: 0.7,
+      };
+      text = JSON.stringify(structured);
     } else if ((lower.includes("单元测试") || lower.includes("测试用例") || lower.includes("修复后")) && !lower.includes("红队")) {
       // ★ 修复后验证（单元测试生成）—— 必须在攻击场景之前（prompt 可能同时含两者）
       structured = generateUnitTests(prompt);
@@ -67,21 +89,6 @@ class MockLlm extends ILlm {
         isFalsePositive: lower.includes("@min") || lower.includes("参数化") || lower.includes("prepared"),
         confidence: 0.85,
         reasoning: "代码已使用参数化查询/校验注解，属已知安全模式。",
-      };
-      text = JSON.stringify(structured);
-    } else if (lower.includes("相似") || lower.includes("变种") || lower.includes("变体") || lower.includes("0-day") || lower.includes("0day")) {
-      // 0-day 变种推理 —— 提前到"可达"分支之前，避免被 prompt 里 JSON 示例的 "reachable" 误触发
-      structured = {
-        variants: [
-          {
-            description: "变种1：source 改为 JSON body 字段",
-            newSource: "http.body.data",
-            newSink: "JSON.parse → 动态字段访问",
-            reachable: true,
-            confidence: 0.7,
-          },
-        ],
-        confidence: 0.7,
       };
       text = JSON.stringify(structured);
     } else if (lower.includes("可达") || lower.includes("是否调用")) {

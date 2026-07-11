@@ -18,24 +18,26 @@ async function huntZeroDay(ctx, deps) {
 
   let generated = 0;
   for (const seed of seeds) {
-    // 1. 沿图谱找该漏洞的变种 CVE
+    // 1. 沿图谱找该漏洞的变种 CVE（有 linkedCves 才查）
     const linkedCves = seed.linkedCves || [];
     let variants = [];
     for (const cve of linkedCves) {
       variants = variants.concat(await knowledgeGraph.findVariants(cve));
     }
     const variantIds = [...new Set(variants.map((v) => v.id))];
-    // 用 getNode 取代 nodes.get（DB 兼容）
     const variantNodes = [];
     for (const id of variantIds) {
       const node = await knowledgeGraph.getNode(id);
       if (node) variantNodes.push(node);
     }
 
-    // 2. LLM 推理
-    const variantInfo = variantNodes.length > 0
+    // ★ 即使没有 linkedCves / 图谱变种，也用 LLM 推理（基于代码模式本身外推）
+    const hasVariants = variantNodes.length > 0;
+
+    // 2. LLM 推理（即使无图谱变种，也基于代码模式外推）
+    const variantInfo = hasVariants
       ? variantNodes.map((v) => `- ${v.id}: ${v.title} (source: ${v.signature?.source?.join(",") || "?"}, sink: ${v.signature?.sink?.join(",") || "?"})`).join("\n")
-      : "(图谱中无已知变种，纯靠 LLM 外推)";
+      : "(无已知图谱变种，请基于漏洞代码模式本身推理语义变体——改变 source/sink/触发路径/绕过现有防护)";
 
     const prompt = `你是 0-day 漏洞挖掘专家。基于以下已确认漏洞，推理可能的"未被已知 CVE 覆盖的语义变体"。
 
