@@ -221,7 +221,43 @@
         "strategy": { "type": "string" },
         "riskLevel": { "type": "string" },
         "rationale": { "type": "string" },
-        "equivalenceCheck": { "type": "boolean" }
+        "equivalenceCheck": { "type": "boolean" },
+        "verification": {
+          "type": "object",
+          "description": "修复后验证结果（POC 回归 + 单元测试）",
+          "properties": {
+            "overallPassed": { "type": "boolean" },
+            "pocRegression": {
+              "type": "object",
+              "properties": {
+                "originalTriggered": { "type": "boolean" },
+                "afterPatchTriggered": { "type": "boolean" },
+                "evidence": { "type": "string" }
+              }
+            },
+            "unitTests": {
+              "type": "object",
+              "properties": {
+                "generated": { "type": "integer" },
+                "passed": { "type": "integer" },
+                "allPassed": { "type": "boolean" },
+                "cases": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "input": { "type": "string" },
+                      "expected": { "type": "string" },
+                      "passed": { "type": "boolean" },
+                      "detail": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

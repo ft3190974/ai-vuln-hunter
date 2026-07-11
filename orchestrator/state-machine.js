@@ -16,7 +16,8 @@ const STATES = [
   { name: "RAG_MATCH", desc: "知识图谱相似度 + 误报二次过滤" },
   { name: "ZERO_DAY", desc: "0-day 变种挖掘（图谱遍历 + LLM 改写）" },
   { name: "VERIFY", desc: "验证 Agent：可达性判定 + POC 生成" },
-  { name: "FIX", desc: "修复 Agent：patch + 等价性回归" },
+  { name: "ATTACK_SCENARIO", desc: "★ 复杂攻击场景构建（多漏洞组合 DAG）" },
+  { name: "FIX", desc: "修复 Agent：patch + 等价性回归 + 修复验证" },
   { name: "LEARN", desc: "学习 Agent：误报回灌 + 规则生成 + 图谱演化" },
   { name: "REPORT", desc: "汇总报告" },
 ];

@@ -22,6 +22,7 @@ class OrchestrationContext {
     this.pendingCandidates = []; // 检测阶段候选（{findingId, ruleId, confidence}）
     this.verifiedPocs = []; // {findingId, poc}
     this.patches = []; // {findingId, patch, strategy}
+    this.attackScenario = null; // ★ 复杂攻击场景（多漏洞组合 DAG）
     this.learnSuggestions = []; // 学习建议（{type, content}）
     this.log = []; // {state, at, msg, level}
     this.current = "INIT";
@@ -49,6 +50,7 @@ class OrchestrationContext {
       findings: this.findings,
       pocs: this.verifiedPocs,
       patches: this.patches,
+      attackScenario: this.attackScenario,
       learnSuggestions: this.learnSuggestions,
       log: this.log,
     };

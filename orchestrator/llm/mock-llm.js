@@ -37,6 +37,14 @@ class MockLlm extends ILlm {
       // ★ C/C++ 专用漏洞挖掘（c-hunter）—— 必须在通用"分析代码"分支之前
       structured = analyzeCCodeForMock(prompt);
       text = JSON.stringify(structured);
+    } else if ((lower.includes("单元测试") || lower.includes("测试用例") || lower.includes("修复后")) && !lower.includes("红队")) {
+      // ★ 修复后验证（单元测试生成）—— 必须在攻击场景之前（prompt 可能同时含两者）
+      structured = generateUnitTests(prompt);
+      text = JSON.stringify(structured);
+    } else if (lower.includes("红队") || lower.includes("攻击路径") || lower.includes("组合攻击") || (lower.includes("攻击场景") && !lower.includes("单元测试"))) {
+      // ★ 复杂攻击场景构建（attack-scenario-builder）
+      structured = buildAttackScenario(prompt);
+      text = JSON.stringify(structured);
     } else if (lower.includes("分析以下代码") || lower.includes("找出") && (lower.includes("漏洞") || lower.includes("逻辑"))) {
       // LLM 自主挖掘（llm-hunter）：按代码内容识别漏洞类型返回
       structured = analyzeCodeForMock(prompt);
@@ -290,4 +298,77 @@ function analyzeCCodeForMock(prompt) {
 
 function mkCVuln(title, severity, reasoning, scenario, line, exploitability, impact) {
   return { title, severity, line, reasoning, attackScenario: scenario, confidence: 0.85, exploitability, impact };
+}
+
+/**
+ * Mock：构建复杂攻击场景（多漏洞组合 DAG）
+ */
+function buildAttackScenario(prompt) {
+  // 从 prompt 提取漏洞列表（找 findingId / category）
+  const findingMatches = [...prompt.matchAll(/"findingId"\s*:\s*"(F-[^"]+)"/g)];
+  const categoryMatches = [...prompt.matchAll(/"category"\s*:\s*"([^"]+)"/g)];
+  const titleMatches = [...prompt.matchAll(/"title"\s*:\s*"([^"]+)"/g)];
+
+  const findings = findingMatches.map((m, i) => ({
+    id: m[1],
+    category: categoryMatches[i]?.[1] || "unknown",
+    title: titleMatches[i]?.[1] || "未知漏洞",
+  }));
+
+  if (findings.length === 0) {
+    return { summary: "无法构建攻击场景（无足够漏洞）", difficulty: "unknown", impact: "未知", paths: [] };
+  }
+
+  // 构建 DAG 路径：攻击者 → 漏洞1 → 漏洞2 → ... → 影响
+  const nodes = [{ id: "attacker", label: "攻击者", type: "entry" }];
+  const edges = [];
+  const severityMap = { business_logic: "逻辑利用", sqli: "SQL注入", authz: "越权", cmdi: "命令注入", overflow: "溢出", deserialization: "反序列化" };
+
+  let prevId = "attacker";
+  findings.forEach((f, i) => {
+    const stepId = `s${i + 1}`;
+    const label = severityMap[f.category] || f.category;
+    nodes.push({
+      id: stepId,
+      label: `${label}: ${f.title.slice(0, 30)}`,
+      findingId: f.id,
+      type: "vuln",
+      output: i < findings.length - 1 ? `获取${label}能力` : "最终目标达成",
+      detail: `利用 ${f.id}（${f.category}）`,
+    });
+    edges.push({ from: prevId, to: stepId, label: i === 0 ? "初始入口" : `上一步输出` });
+    prevId = stepId;
+  });
+
+  // 影响节点
+  nodes.push({ id: "impact", label: "💥 最终影响", type: "impact" });
+  edges.push({ from: prevId, to: "impact", label: "完全控制" });
+
+  const difficulty = findings.length >= 3 ? "medium" : "low";
+  const impact = findings.some((f) => ["cmdi", "deserialization", "overflow"].includes(f.category))
+    ? "远程代码执行，完全接管服务器" : "数据泄露/权限提升";
+
+  return {
+    summary: `攻击者通过组合 ${findings.length} 个漏洞，实现${impact}`,
+    difficulty,
+    impact,
+    paths: [{ name: "主攻击路径", nodes, edges }],
+  };
+}
+
+/**
+ * Mock：生成单元测试用例（修复后验证）
+ */
+function generateUnitTests(prompt) {
+  // 从 prompt 提取漏洞类别
+  const catMatch = prompt.match(/漏洞类别:\s*(\w+)/);
+  const category = catMatch?.[1] || "unknown";
+
+  const tests = [
+    { name: `testNormalInput_${category}`, input: "正常用户输入", expectedBehavior: "功能正常返回预期结果", passed: true, detail: "修复后功能保持正常" },
+    { name: `testMaliciousInput_${category}`, input: "恶意攻击载荷", expectedBehavior: "恶意输入被拦截/中和", passed: true, detail: "原漏洞 payload 已无法利用" },
+    { name: `testEdgeCase_${category}`, input: "边界值/空值/超长", expectedBehavior: "优雅处理不崩溃", passed: true, detail: "边界情况处理正确" },
+  ];
+
+  return { tests };
 }

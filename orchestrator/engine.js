@@ -25,6 +25,7 @@ const fixer = require("./agents/fixer");
 const learner = require("./agents/learner");
 const zeroDayHunter = require("./agents/zero-day-hunter");
 const llmHunter = require("./agents/llm-hunter");
+const attackScenarioBuilder = require("./agents/attack-scenario-builder");
 
 // 颜色（降级兼容 Windows）
 const C = (() => {
@@ -70,6 +71,7 @@ class OrchestratorEngine {
       RAG_MATCH: (ctx) => verifier.ragMatch(ctx, this.deps),
       ZERO_DAY: (ctx) => zeroDayHunter.huntZeroDay(ctx, this.deps),
       VERIFY: (ctx) => verifier.verify(ctx, this.deps),
+      ATTACK_SCENARIO: (ctx) => attackScenarioBuilder.build(ctx, this.deps),
       FIX: (ctx) => fixer.fix(ctx, this.deps),
       LEARN: (ctx) => learner.learn(ctx, this.deps),
       REPORT: (ctx) => {
