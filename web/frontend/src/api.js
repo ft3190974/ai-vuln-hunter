@@ -64,6 +64,7 @@ export const api = {
     request("/scan", { method: "POST", body: { scanRequest, toolOutputs, sourceInput } }),
   getScan: (id) => request(`/scan/${id}`),
   listScans: () => request("/scan"),
+  deleteScan: (id) => request(`/scan/${id}`, { method: "DELETE" }),
   vulnDbSources: () => request("/vuln-db/sources"),
   syncVulnDb: (source) =>
     request(`/vuln-db/sync${source ? "?source=" + source : ""}`, { method: "POST" }),

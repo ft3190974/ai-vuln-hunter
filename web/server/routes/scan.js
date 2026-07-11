@@ -105,6 +105,26 @@ function scanRoutes({ engine, scanJobs }) {
     return res.json(list);
   });
 
+  // 删除任务（同时删除该任务的所有 Finding）
+  router.delete("/scan/:id", async (req, res) => {
+    try {
+      const job = scanJobs.get(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: `任务 ${req.params.id} 不存在` });
+      }
+      // 删除关联的 Finding
+      const findings = await engine.findingStore.query({ scanId: req.params.id });
+      for (const f of findings) {
+        await engine.findingStore.remove(f.findingId);
+      }
+      // 删除任务
+      scanJobs.delete(req.params.id);
+      res.json({ deleted: req.params.id, findingsRemoved: findings.length });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   return router;
 }
 

@@ -44,6 +44,13 @@ class FindingStore {
     return this.findings.find((x) => x.findingId === findingId) || null;
   }
 
+  async remove(findingId) {
+    const idx = this.findings.findIndex((x) => x.findingId === findingId);
+    if (idx === -1) return false;
+    this.findings.splice(idx, 1);
+    return true;
+  }
+
   async query(filter = {}) {
     return this.findings.filter((f) => {
       if (filter.status && f.status !== filter.status) return false;

@@ -30,8 +30,18 @@ export default function TasksPage() {
   }, []);
 
   const viewFindings = (scanId) => {
-    // 跳到漏洞清单页，带 scanId 参数
     navigate(`/findings?scanId=${scanId}`);
+  };
+
+  const deleteTask = async (scanId, e) => {
+    e.stopPropagation();
+    if (!confirm(`确定删除任务 ${scanId}？该任务的所有漏洞也会一起删除，不可恢复。`)) return;
+    try {
+      await api.deleteScan(scanId);
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   if (loading && tasks.length === 0) return <p className="loading">加载中...</p>;
@@ -81,12 +91,19 @@ export default function TasksPage() {
                 <td>
                   {t.status === "completed" && (
                     <button
-                      style={{ fontSize: 12, padding: "4px 10px" }}
-                      onClick={() => viewFindings(t.scanId)}
+                      style={{ fontSize: 12, padding: "4px 10px", marginRight: 6 }}
+                      onClick={(e) => { e.stopPropagation(); viewFindings(t.scanId); }}
                     >
                       查看漏洞 →
                     </button>
                   )}
+                  <button
+                    className="secondary"
+                    style={{ fontSize: 12, padding: "4px 10px", color: "#fca5a5" }}
+                    onClick={(e) => deleteTask(t.scanId, e)}
+                  >
+                    删除
+                  </button>
                 </td>
               </tr>
             ))}
