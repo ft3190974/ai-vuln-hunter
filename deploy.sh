@@ -93,6 +93,10 @@ cd ../..
 cd orchestrator
 npm install --silent 2>&1 | tail -1 || true
 cd ..
+# mcp-server 需要依赖（ajv 校验 + MCP SDK）
+cd mcp-server
+npm install --silent 2>&1 | tail -1 || true
+cd ..
 echo "  ✓ 后端依赖就绪"
 
 # ── 5. 安装 PM2（进程管理，保证服务不中断）──
