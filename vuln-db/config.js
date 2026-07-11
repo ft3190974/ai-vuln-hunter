@@ -51,6 +51,52 @@ const config = {
         process.env.VULNDB_NUCLEI_PATH ||
         require("path").resolve(__dirname, "..", "vuln-db", "seed-templates"),
     },
+
+    // ── 以下为新增 6 个漏洞库 ──
+
+    // CNVD — 中国国家信息安全漏洞共享平台
+    cnvd: {
+      enabled: process.env.VULNDB_CNVD_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_CNVD_API_URL || "https://www.cnvd.org.cn/flaw/listJSON",
+      timeoutMs: 30000,
+    },
+
+    // CNNVD — 中国国家信息安全漏洞库
+    cnnvd: {
+      enabled: process.env.VULNDB_CNNVD_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_CNNVD_API_URL || "https://www.cnnvd.org.cn/web/data/listJSON",
+      timeoutMs: 30000,
+    },
+
+    // GitHub Security Advisory — GitHub 安全公告
+    ghsa: {
+      enabled: process.env.VULNDB_GHSA_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_GHSA_API_URL || "https://api.github.com/advisories",
+      token: process.env.GITHUB_TOKEN || "", // 可选，提高速率限制
+      timeoutMs: 30000,
+    },
+
+    // Vulncheck NVD++ — 威胁情报增强漏洞库
+    vulncheck: {
+      enabled: process.env.VULNDB_VULNCHECK_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_VULNCHECK_API_URL || "https://api.vulncheck.com/v3/nvd",
+      apiKey: process.env.VULNDB_VULNCHECK_API_KEY || "",
+      timeoutMs: 30000,
+    },
+
+    // Exploit-DB — 公开漏洞利用代码库
+    exploitdb: {
+      enabled: process.env.VULNDB_EXPLOITDB_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_EXPLOITDB_API_URL || "https://www.exploit-db.com/search",
+      timeoutMs: 30000,
+    },
+
+    // Seebug — 中文 PoC 漏洞平台
+    seebug: {
+      enabled: process.env.VULNDB_SEEBUG_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_SEEBUG_API_URL || "https://www.seebug.org/api/list",
+      timeoutMs: 30000,
+    },
   },
 };
 

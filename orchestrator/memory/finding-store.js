@@ -60,10 +60,12 @@ class FindingStore {
 
   async stats() {
     const byStatus = {};
+    const bySeverity = {};
     for (const f of this.findings) {
       byStatus[f.status] = (byStatus[f.status] || 0) + 1;
+      if (f.severity) bySeverity[f.severity] = (bySeverity[f.severity] || 0) + 1;
     }
-    return { total: this.findings.length, byStatus };
+    return { total: this.findings.length, byStatus, bySeverity };
   }
 }
 

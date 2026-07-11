@@ -1,15 +1,12 @@
-// src/pages/FindingsPage.jsx — 漏洞清单（按任务隔离）
+// src/pages/FindingsPage.jsx — 漏洞清单（全局汇总，标注所属任务）
 import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api.js";
 import SeverityBadge from "../components/SeverityBadge.jsx";
 import FindingDetail from "../components/FindingDetail.jsx";
 
 export default function FindingsPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const scanId = searchParams.get("scanId");
-
   const [findings, setFindings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,10 +17,12 @@ export default function FindingsPage() {
     setLoading(true);
     setError(null);
     try {
-      const f = { scanId };
+      const f = {};
       if (filter.status) f.status = filter.status;
       if (filter.category) f.category = filter.category;
       const data = await api.findings(f);
+      // 按时间倒序（最新任务的漏洞在前）
+      data.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
       setFindings(data);
     } catch (e) {
       setError(e.message);
@@ -32,36 +31,16 @@ export default function FindingsPage() {
     }
   };
 
-  useEffect(() => {
-    if (scanId) load();
-    else setLoading(false);
-  }, [scanId]); // eslint-disable-line
-
-  // 没有 scanId → 提示去任务管理选任务
-  if (!scanId) {
-    return (
-      <div>
-        <h1>漏洞清单</h1>
-        <div className="msg msg-info">
-          请先在「任务管理」中选择一个已完成的任务，查看该任务的漏洞清单。
-        </div>
-        <button onClick={() => navigate("/tasks")}>前往任务管理 →</button>
-      </div>
-    );
-  }
+  useEffect(() => { load(); }, []); // eslint-disable-line
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h1 style={{ margin: 0 }}>
-          漏洞清单
-          <span style={{ fontSize: 14, color: "var(--text-dim)", marginLeft: 12 }}>
-            任务: {scanId}
-          </span>
-        </h1>
-        <button className="secondary" onClick={() => navigate("/tasks")}>← 返回任务列表</button>
-      </div>
+      <h1>漏洞清单</h1>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 16 }}>
+        所有任务的漏洞汇总。每条漏洞标注所属任务，点击行展开查看详情。
+      </p>
 
+      {/* 筛选 */}
       <div className="card" style={{ display: "flex", gap: 16, alignItems: "flex-end" }}>
         <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
           <label>状态</label>
@@ -74,7 +53,7 @@ export default function FindingsPage() {
           </select>
         </div>
         <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-          <label>类别</label>
+          <label>漏洞类型</label>
           <select value={filter.category} onChange={(e) => setFilter({ ...filter, category: e.target.value })}>
             <option value="">全部</option>
             <option value="sqli">SQL 注入</option>
@@ -98,17 +77,17 @@ export default function FindingsPage() {
       {loading ? (
         <p className="loading">加载中...</p>
       ) : findings.length === 0 ? (
-        <div className="msg msg-info">该任务暂无漏洞（或筛选条件无匹配）</div>
+        <div className="msg msg-info">
+          暂无漏洞。去「扫描任务」页提交代码，或「任务管理」查看已完成的任务。
+        </div>
       ) : (
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>标题</th>
-              <th>📍 位置</th>
-              <th>类别</th>
+              <th>漏洞 ID</th>
+              <th>漏洞类型</th>
+              <th>所属任务</th>
               <th>严重度</th>
-              <th>状态</th>
               <th>置信度</th>
               <th>0-day</th>
             </tr>
@@ -122,19 +101,25 @@ export default function FindingsPage() {
                   onClick={() => setExpandedId(expandedId === f.findingId ? null : f.findingId)}
                 >
                   <td style={{ fontFamily: "monospace", fontSize: 12 }}>{f.findingId}</td>
-                  <td>{f.title}</td>
-                  <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--accent)" }}>
-                    {(f.location?.file || "?").split(/[\\/]/).pop()}:{f.location?.startLine || "?"}
-                  </td>
                   <td><code>{f.category}</code></td>
+                  <td style={{ fontSize: 12 }}>
+                    {f.scanId ? (
+                      <a
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(`/tasks`); }}
+                        style={{ color: "var(--accent)", textDecoration: "none" }}
+                      >
+                        {f.scanId}
+                      </a>
+                    ) : "—"}
+                  </td>
                   <td><SeverityBadge severity={f.severity} /></td>
-                  <td><span className={`badge badge-${f.status}`}>{f.status}</span></td>
                   <td>{(f.confidence * 100).toFixed(0)}%</td>
                   <td>{f.isZeroDay ? "⚠️" : ""}</td>
                 </tr>
                 {expandedId === f.findingId && (
                   <tr key={f.findingId + "-detail"}>
-                    <td colSpan={8} style={{ background: "var(--bg)" }}>
+                    <td colSpan={6} style={{ background: "var(--bg)" }}>
                       <FindingDetail finding={f} />
                     </td>
                   </tr>

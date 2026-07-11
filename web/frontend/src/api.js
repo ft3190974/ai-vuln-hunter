@@ -51,6 +51,7 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request("/health"),
   status: () => request("/status"),
+  dashboard: () => request("/dashboard"),
   graph: () => request("/graph"),
   graphVariants: (id) => request(`/graph/variants/${id}`),
   findings: (filter = {}) => {

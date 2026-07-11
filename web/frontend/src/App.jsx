@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Routes, Route, NavLink, useNavigate } from "react-router-dom";
 import { api, auth } from "./api.js";
 import { useTheme } from "./hooks/useTheme.js";
+import DashboardPage from "./pages/DashboardPage.jsx";
 import ScanPage from "./pages/ScanPage.jsx";
 import FindingsPage from "./pages/FindingsPage.jsx";
 import TasksPage from "./pages/TasksPage.jsx";
@@ -56,7 +57,8 @@ export default function App() {
       <aside className="sidebar">
         <div className="logo">🛡️ AI 漏洞挖掘</div>
         <nav>
-          <NavLink to="/" end className="nav-link">扫描任务</NavLink>
+          <NavLink to="/" end className="nav-link">📊 态势总览</NavLink>
+          <NavLink to="/scan" className="nav-link">扫描任务</NavLink>
           <NavLink to="/tasks" className="nav-link">📋 任务管理</NavLink>
           <NavLink to="/findings" className="nav-link">漏洞清单</NavLink>
           <NavLink to="/rules" className="nav-link">⚙️ 规则配置</NavLink>
@@ -72,7 +74,8 @@ export default function App() {
       </aside>
       <main className="content">
         <Routes>
-          <Route path="/" element={<ScanPage />} />
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/scan" element={<ScanPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/findings" element={<FindingsPage />} />
           <Route path="/rules" element={<RulesPage />} />

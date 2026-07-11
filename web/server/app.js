@@ -31,6 +31,7 @@ const vulnDbRoutes = require("./routes/vuln-db");
 const authRoutes = require("./routes/auth");
 const ruleRoutes = require("./routes/rules");
 const uploadRoutes = require("./routes/upload");
+const dashboardRoutes = require("./routes/dashboard");
 const { metricsRoutes, httpMetricsMiddleware } = require("./routes/metrics");
 const { UserStore } = require("./auth/users");
 const { authMiddleware } = require("./auth/middleware");
@@ -84,7 +85,8 @@ async function createApp(options = {}) {
     statusRoutes({ engine, syncManager }),
     graphRoutes({ engine }),
     vulnDbRoutes({ syncManager }),
-    ruleRoutes({ engine })
+    ruleRoutes({ engine }),
+    dashboardRoutes({ engine })
   );
 
   // 静态托管前端（生产环境）

@@ -8,6 +8,12 @@ const { NvdConnector } = require("./connectors/nvd-connector");
 const { OsvConnector } = require("./connectors/osv-connector");
 const { CapecConnector } = require("./connectors/capec-connector");
 const { NucleiConnector } = require("./connectors/nuclei-connector");
+const { CnvdConnector } = require("./connectors/cnvd-connector");
+const { CnnvdConnector } = require("./connectors/cnnvd-connector");
+const { GhsaConnector } = require("./connectors/ghsa-connector");
+const { VulncheckConnector } = require("./connectors/vulncheck-connector");
+const { ExploitDbConnector } = require("./connectors/exploitdb-connector");
+const { SeebugConnector } = require("./connectors/seebug-connector");
 
 class SyncManager {
   /**
@@ -23,6 +29,12 @@ class SyncManager {
     this._register(new OsvConnector());
     this._register(new CapecConnector());
     this._register(new NucleiConnector());
+    this._register(new CnvdConnector());
+    this._register(new CnnvdConnector());
+    this._register(new GhsaConnector());
+    this._register(new VulncheckConnector());
+    this._register(new ExploitDbConnector());
+    this._register(new SeebugConnector());
 
     this.lastSyncAt = null;
     this.timer = null;
