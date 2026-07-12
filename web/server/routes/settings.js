@@ -13,7 +13,10 @@
 // POST /api/settings/tools/:id/test  测试工具连通性
 
 const express = require("express");
+const fs = require("fs");
 const path = require("path");
+
+const SETTINGS_FILE = path.resolve(__dirname, "..", "..", "..", "data", "settings.json");
 
 // 引入编排引擎的 LLM 动态配置
 let setDynamicLlmConfig = null;
@@ -23,31 +26,39 @@ try {
   console.warn("[settings] 无法加载编排引擎 LLM 模块，动态切换不可用");
 }
 
+// 持久化加载/保存
+function loadSettings() {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8"));
+  } catch {}
+  return { llmConfigs: [], toolConfigs: [] };
+}
+function saveSettings(data) {
+  try {
+    const dir = path.dirname(SETTINGS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2));
+  } catch (e) { console.warn("[settings] 保存失败:", e.message); }
+}
+
 function settingsRoutes() {
   const router = express.Router();
 
-  // ── LLM 配置（内存存储，生产用 DB）──
-  const llmConfigs = []; // {id, name, provider, baseUrl, apiKey, model, difficulty, enabled, createdAt}
-  let llmIdCounter = 0;
-
-  // 默认配置（从环境变量读）
-  llmConfigs.push({
-    id: "llm-default",
-    name: "默认 LLM",
-    provider: process.env.LLM_MODE === "glm" ? "glm" : "mock",
-    baseUrl: process.env.GLM_BASE_URL || "https://open.bigmodel.cn/api/paas/v4",
-    apiKey: process.env.GLM_API_KEY ? "***（环境变量）" : "",
-    model: "glm-4-plus",
-    temperature: 0.2,
-    maxTokens: 2048,
-    difficulty: "auto", // low/medium/high/auto
-    enabled: true,
-    isDefault: true,
-    createdAt: new Date().toISOString(),
-  });
+  // ── LLM 配置（持久化到 data/settings.json）──
+  const saved = loadSettings();
+  const llmConfigs = saved.llmConfigs?.length ? saved.llmConfigs : [
+    {
+      id: "llm-default", name: "默认 LLM", provider: "mock",
+      baseUrl: "https://open.bigmodel.cn/api/paas/v4", apiKey: "",
+      model: "glm-4-plus", temperature: 0.2, maxTokens: 2048,
+      difficulty: "auto", enabled: true, isDefault: true, createdAt: new Date().toISOString(),
+    },
+  ];
+  let llmIdCounter = llmConfigs.length;
 
   // 同步启用的 LLM 配置到编排引擎
   function syncLlmToEngine() {
+    saveSettings({ llmConfigs, toolConfigs });
     if (!setDynamicLlmConfig) return;
     const enabled = llmConfigs.find((c) => c.enabled && c.provider !== "mock");
     if (enabled) {
@@ -115,35 +126,12 @@ function settingsRoutes() {
     }
   });
 
-  // ── 工具集成配置（MCP SAST/SCA/BAT/MST/FUZZ/DAST）──
-  const toolConfigs = []; // {id, name, toolType, mcpCommand, mcpArgs, mcpUrl, enabled, createdAt}
-  let toolIdCounter = 0;
-
-  // 预置示例（引导用户填写）
-  toolConfigs.push({
-    id: "tool-example-sast",
-    name: "示例：软安 SAST",
-    toolType: "SAST",
-    mcpCommand: "node",
-    mcpArgs: "/path/to/ruanan-sast-mcp/server.js",
-    mcpUrl: "",
-    autoRun: true,
-    enabled: false,
-    isExample: true,
-    createdAt: new Date().toISOString(),
-  });
-  toolConfigs.push({
-    id: "tool-example-sca",
-    name: "示例：软安 SCA",
-    toolType: "SCA",
-    mcpCommand: "node",
-    mcpArgs: "/path/to/ruanan-sca-mcp/server.js",
-    mcpUrl: "",
-    autoRun: true,
-    enabled: false,
-    isExample: true,
-    createdAt: new Date().toISOString(),
-  });
+  // ── 工具集成配置（持久化）──
+  const toolConfigs = saved.toolConfigs?.length ? saved.toolConfigs : [
+    { id: "tool-example-sast", name: "示例：软安 SAST", toolType: "SAST", mcpCommand: "node", mcpArgs: "/path/to/ruanan-sast-mcp/server.js", mcpUrl: "", autoRun: true, enabled: false, isExample: true, createdAt: new Date().toISOString() },
+    { id: "tool-example-sca", name: "示例：软安 SCA", toolType: "SCA", mcpCommand: "node", mcpArgs: "/path/to/ruanan-sca-mcp/server.js", mcpUrl: "", autoRun: true, enabled: false, isExample: true, createdAt: new Date().toISOString() },
+  ];
+  let toolIdCounter = toolConfigs.length;
 
   router.get("/settings/tools", (_req, res) => res.json(toolConfigs));
 
@@ -192,6 +180,9 @@ function settingsRoutes() {
       res.json({ success: false, message: "未配置 MCP URL 或命令" });
     }
   });
+
+  // 启动时自动同步 LLM 配置到引擎
+  syncLlmToEngine();
 
   return router;
 }
