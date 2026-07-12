@@ -4,7 +4,19 @@
 // GET  /api/scan/:id  查询扫描任务状态/结果
 
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const { scansTotal } = require("../observability/metrics");
+
+const SCAN_JOBS_FILE = path.resolve(__dirname, "..", "..", "..", "data", "scan-jobs.json");
+function saveScanJobs(jobs) {
+  try {
+    const dir = path.dirname(SCAN_JOBS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const obj = {}; for (const [id, job] of jobs.entries()) obj[id] = job;
+    fs.writeFileSync(SCAN_JOBS_FILE, JSON.stringify(obj, null, 2));
+  } catch {}
+}
 
 function scanRoutes({ engine, scanJobs }) {
   const router = express.Router();
@@ -45,6 +57,7 @@ function scanRoutes({ engine, scanJobs }) {
             job.completedAt = new Date().toISOString();
           }
           scansTotal.inc({ status: "completed" });
+          saveScanJobs(scanJobs);
         })
         .catch((e) => {
           const job = scanJobs.get(scanId);
@@ -53,6 +66,7 @@ function scanRoutes({ engine, scanJobs }) {
             job.error = e.message;
           }
           scansTotal.inc({ status: "failed" });
+          saveScanJobs(scanJobs);
         });
 
       // 记录提交指标
@@ -119,6 +133,7 @@ function scanRoutes({ engine, scanJobs }) {
       }
       // 删除任务
       scanJobs.delete(req.params.id);
+      saveScanJobs(scanJobs);
       res.json({ deleted: req.params.id, findingsRemoved: findings.length });
     } catch (e) {
       res.status(500).json({ error: e.message });

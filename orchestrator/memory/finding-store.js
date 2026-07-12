@@ -1,13 +1,42 @@
-// memory/finding-store.js — Finding 持久化（内存版，全 async）
+// memory/finding-store.js — Finding 持久化（内存 + JSON 文件，重启不丢）
 //
-// 所有方法均为 async，与 DB 版（pg-finding-store.js）接口一致，可无感替换。
-// 生产环境用 Postgres（JSONB 存整个 Finding 对象），此处用内存数组演示。
+// 所有方法均为 async，与 DB 版接口一致。
+// 启动时从 JSON 文件加载，每次变更后自动保存。
+
+const fs = require("fs");
+const path = require("path");
+
+const PERSIST_FILE = process.env.FINDING_STORE_FILE || path.join(process.cwd(), "data", "findings.json");
 
 class FindingStore {
   constructor() {
-    /** @type {Array<Object>} */
     this.findings = [];
     this.counter = 0;
+    this._load();
+  }
+
+  /** 从文件加载（启动时） */
+  _load() {
+    try {
+      if (fs.existsSync(PERSIST_FILE)) {
+        const data = JSON.parse(fs.readFileSync(PERSIST_FILE, "utf-8"));
+        this.findings = data.findings || [];
+        this.counter = data.counter || this.findings.length;
+      }
+    } catch (e) {
+      console.warn("[FindingStore] 加载持久化文件失败:", e.message);
+    }
+  }
+
+  /** 保存到文件（每次变更后调用） */
+  _save() {
+    try {
+      const dir = path.dirname(PERSIST_FILE);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(PERSIST_FILE, JSON.stringify({ findings: this.findings, counter: this.counter }, null, 2));
+    } catch (e) {
+      console.warn("[FindingStore] 保存持久化文件失败:", e.message);
+    }
   }
 
   /** 生成下一个 findingId（格式 F-YYYY-NNNNNN） */
@@ -30,6 +59,7 @@ class FindingStore {
       ...partial,
     };
     this.findings.push(finding);
+    this._save();
     return finding;
   }
 
@@ -37,6 +67,7 @@ class FindingStore {
     const f = this.findings.find((x) => x.findingId === findingId);
     if (!f) return null;
     Object.assign(f, patch, { updatedAt: new Date().toISOString() });
+    this._save();
     return f;
   }
 
@@ -48,6 +79,7 @@ class FindingStore {
     const idx = this.findings.findIndex((x) => x.findingId === findingId);
     if (idx === -1) return false;
     this.findings.splice(idx, 1);
+    this._save();
     return true;
   }
 

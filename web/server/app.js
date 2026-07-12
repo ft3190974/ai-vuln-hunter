@@ -56,8 +56,28 @@ async function createApp(options = {}) {
   // 用户存储（内存版，N 之后可接 Postgres）
   const userStore = options.userStore || new UserStore();
 
-  // 扫描任务存储（异步：POST 立即返回 scanId，后台跑，结果存这里）
+  // 扫描任务存储（文件持久化，重启不丢）
+  const SCAN_JOBS_FILE = path.resolve(__dirname, "..", "..", "data", "scan-jobs.json");
+  const fs = require("fs");
   const scanJobs = new Map();
+  // 启动时加载
+  try {
+    if (fs.existsSync(SCAN_JOBS_FILE)) {
+      const saved = JSON.parse(fs.readFileSync(SCAN_JOBS_FILE, "utf-8"));
+      for (const [id, job] of Object.entries(saved)) scanJobs.set(id, job);
+      console.log(`[app] 恢复 ${scanJobs.size} 个历史任务`);
+    }
+  } catch (e) { console.warn("[app] 加载任务历史失败:", e.message); }
+  // 保存函数
+  function saveScanJobs() {
+    try {
+      const dir = path.dirname(SCAN_JOBS_FILE);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      const obj = {};
+      for (const [id, job] of scanJobs.entries()) obj[id] = job;
+      fs.writeFileSync(SCAN_JOBS_FILE, JSON.stringify(obj, null, 2));
+    } catch (e) { console.warn("[app] 保存任务历史失败:", e.message); }
+  }
 
   const app = express();
   app.use(cors());
