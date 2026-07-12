@@ -97,6 +97,44 @@ const config = {
       apiUrl: process.env.VULNDB_SEEBUG_API_URL || "https://www.seebug.org/api/list",
       timeoutMs: 30000,
     },
+
+    // ── 以下为 6 个 AI 安全漏洞库 ──
+
+    // OWASP LLM Top 10 — AI 安全分类标准
+    owasp_llm: {
+      enabled: process.env.VULNDB_OWASP_LLM_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_OWASP_LLM_URL || "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+    },
+
+    // MITRE ATLAS — AI 攻击战术库
+    atlas: {
+      enabled: process.env.VULNDB_ATLAS_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_ATLAS_URL || "https://atlas.mitre.org/",
+    },
+
+    // PurpleLlama — Meta AI 安全评估规则
+    purplellama: {
+      enabled: process.env.VULNDB_PURPLELLAMA_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_PURPLELLAMA_URL || "https://raw.githubusercontent.com/meta-llama/PurpleLlama/main/",
+    },
+
+    // AIVD — AI 漏洞数据库
+    aivd: {
+      enabled: process.env.VULNDB_AIVD_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_AIVD_URL || "https://aivd.org/api/",
+    },
+
+    // Garak — LLM 漏洞扫描基准
+    garak: {
+      enabled: process.env.VULNDB_GARAK_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_GARAK_URL || "https://raw.githubusercontent.com/leondz/garak/main/",
+    },
+
+    // AI-TVDs — 中文 AI 安全漏洞库
+    ai_tvds: {
+      enabled: process.env.VULNDB_AI_TVDS_ENABLED !== "0",
+      apiUrl: process.env.VULNDB_AI_TVDS_URL || "https://ai-tvds.org/api/",
+    },
   },
 };
 

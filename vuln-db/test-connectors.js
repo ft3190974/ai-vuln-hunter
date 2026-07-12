@@ -86,7 +86,7 @@ async function main() {
   // 4. 同步状态查询
   console.log("\n" + HDR + "[4] 同步状态查询" + "\x1b[0m");
   const status = sync.status();
-  check("状态记录 10 个源", status.sources.length === 10, `(${status.sources.length} 个)`);
+  check("状态记录 16 个源", status.sources.length === 16, `(${status.sources.length} 个)`);
   for (const s of status.sources) {
     check(`${s.source} 状态有 lastSyncAt`, !!s.lastSyncAt, `(${s.lastSyncAt?.slice(11, 19)})`);
   }

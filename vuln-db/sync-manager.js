@@ -14,6 +14,12 @@ const { GhsaConnector } = require("./connectors/ghsa-connector");
 const { VulncheckConnector } = require("./connectors/vulncheck-connector");
 const { ExploitDbConnector } = require("./connectors/exploitdb-connector");
 const { SeebugConnector } = require("./connectors/seebug-connector");
+const { OwaspLlmConnector } = require("./connectors/owasp-llm-connector");
+const { AtlasConnector } = require("./connectors/atlas-connector");
+const { PurpleLlamaConnector } = require("./connectors/purplellama-connector");
+const { AivdConnector } = require("./connectors/aivd-connector");
+const { GarakConnector } = require("./connectors/garak-connector");
+const { AiTvdsConnector } = require("./connectors/ai-tvds-connector");
 
 class SyncManager {
   /**
@@ -35,6 +41,12 @@ class SyncManager {
     this._register(new VulncheckConnector());
     this._register(new ExploitDbConnector());
     this._register(new SeebugConnector());
+    this._register(new OwaspLlmConnector());
+    this._register(new AtlasConnector());
+    this._register(new PurpleLlamaConnector());
+    this._register(new AivdConnector());
+    this._register(new GarakConnector());
+    this._register(new AiTvdsConnector());
 
     this.lastSyncAt = null;
     this.timer = null;
