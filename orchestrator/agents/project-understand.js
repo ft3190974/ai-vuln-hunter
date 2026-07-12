@@ -157,6 +157,24 @@ function extractKeyFiles(sourceInput) {
   ];
 
   walkDir(basePath, keyPatterns, keyFiles, 0, 15);
+
+  // ★ 按优先级排序关键文件：后端入口/路由 > 配置 > 其他 > 前端
+  keyFiles.sort((a, b) => {
+    const score = (f) => {
+      const n = f.file.toLowerCase();
+      let s = 0;
+      if (/app\.py|main\.py|server\.py|manage\.py/.test(n)) s += 100;
+      if (/controller|router|route|view|handler|api/.test(n)) s += 80;
+      if (/model|service|middleware/.test(n)) s += 60;
+      if (/config|setting|__init__/.test(n)) s += 40;
+      if (/login|auth|security/.test(n)) s += 50;
+      // 前端降级
+      if (/static|public|assets|template|\.html$/.test(n)) s -= 50;
+      if (/\.css$|\.png$|\.jpg$/.test(n)) s -= 100;
+      return s;
+    };
+    return score(b) - score(a);
+  });
   return keyFiles;
 }
 

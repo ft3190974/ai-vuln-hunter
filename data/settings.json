@@ -1,0 +1,44 @@
+{
+  "llmConfigs": [
+    {
+      "id": "llm-default",
+      "name": "默认 LLM",
+      "provider": "mock",
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+      "apiKey": "",
+      "model": "glm-4-plus",
+      "temperature": 0.2,
+      "maxTokens": 2048,
+      "difficulty": "auto",
+      "enabled": true,
+      "isDefault": true,
+      "createdAt": "2026-07-12T17:54:44.514Z"
+    }
+  ],
+  "toolConfigs": [
+    {
+      "id": "tool-example-sast",
+      "name": "示例：软安 SAST",
+      "toolType": "SAST",
+      "mcpCommand": "node",
+      "mcpArgs": "/path/to/ruanan-sast-mcp/server.js",
+      "mcpUrl": "",
+      "autoRun": true,
+      "enabled": false,
+      "isExample": true,
+      "createdAt": "2026-07-12T17:54:44.514Z"
+    },
+    {
+      "id": "tool-example-sca",
+      "name": "示例：软安 SCA",
+      "toolType": "SCA",
+      "mcpCommand": "node",
+      "mcpArgs": "/path/to/ruanan-sca-mcp/server.js",
+      "mcpUrl": "",
+      "autoRun": true,
+      "enabled": false,
+      "isExample": true,
+      "createdAt": "2026-07-12T17:54:44.514Z"
+    }
+  ]
+}

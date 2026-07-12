@@ -323,11 +323,41 @@ function understandProjectForMock(prompt) {
 
   // 按代码特征推断项目类型
   let projectType = "Web 应用";
+  let framework = "未知";
   const modules = [];
   const riskAreas = [];
   const businessRules = [];
   const flows = {};
   const states = {};
+
+  // ★ 先识别框架（最关键，决定后续判断）
+  if (codeLower.includes("flask") || codeLower.includes("@app.route") || codeLower.includes("from flask")) {
+    framework = "Flask";
+  } else if (codeLower.includes("django") || codeLower.includes("from django")) {
+    framework = "Django";
+  } else if (codeLower.includes("fastapi") || codeLower.includes("@app.get") || codeLower.includes("from fastapi")) {
+    framework = "FastAPI";
+  } else if (codeLower.includes("express") || codeLower.includes("app.get(") && codeLower.includes("require(")) {
+    framework = "Express.js";
+  } else if (codeLower.includes("spring") || codeLower.includes("@restcontroller") || codeLower.includes("@requestmapping")) {
+    framework = "Spring Boot";
+  } else if (codeLower.includes("gin") && codeLower.includes("func ")) {
+    framework = "Gin (Go)";
+  } else if (codeLower.includes("#include")) {
+    framework = "C/C++";
+    projectType = "C/C++ 系统";
+  }
+
+  // ★ 根据 framework 判断是否是安全靶场/教学项目
+  if (codeLower.includes("sqli") || codeLower.includes("xss") || codeLower.includes("ssrf") ||
+      codeLower.includes("csrf") || codeLower.includes("rce") || codeLower.includes("ssti") ||
+      codeLower.includes("vuln") || codeLower.includes("漏洞") || codeLower.includes("injection") ||
+      codeLower.includes("payload") || codeLower.includes("exploit") || codeLower.includes("靶场")) {
+    projectType = "Web 安全靶场/漏洞演示系统";
+    riskAreas.push("SQL注入", "XSS", "SSRF", "CSRF", "命令注入", "文件上传", "SSTI", "路径穿越", "反序列化");
+    businessRules.push("靶场环境故意包含漏洞", "不应用于生产环境");
+    modules.push("漏洞演示", "用户认证");
+  }
 
   if (codeLower.includes("order") || codeLower.includes("订单")) {
     projectType = "电商/订单系统";
@@ -370,7 +400,7 @@ function understandProjectForMock(prompt) {
 
   return {
     projectType,
-    framework: codeLower.includes("spring") ? "Spring Boot" : codeLower.includes("django") ? "Django" : codeLower.includes("express") ? "Express" : codeLower.includes("#include") ? "C/C++" : "未知",
+    framework,
     modules: [...new Set(modules)],
     entryPoints: [],
     businessFlows: flows,

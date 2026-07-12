@@ -207,6 +207,5 @@ function walkDir(dir, maxFiles) {
   // 合并：高优先级 > 普通 > 前端
   return [...highPriority, ...normalPriority, ...lowPriority].slice(0, maxFiles * 3);
 }
-}
 
 module.exports = { sliceSource, sliceFile, detectLanguage };

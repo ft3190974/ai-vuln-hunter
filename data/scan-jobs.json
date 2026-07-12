@@ -6997,5 +6997,279 @@
     },
     "error": null,
     "completedAt": "2026-07-12T17:48:42.353Z"
+  },
+  "flask-test-001": {
+    "scanId": "flask-test-001",
+    "status": "completed",
+    "startedAt": "2026-07-12T17:54:48.914Z",
+    "report": {
+      "scanId": "flask-test-001",
+      "startedAt": "2026-07-12T17:54:48.914Z",
+      "completedAt": "2026-07-12T17:54:53.430Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": {
+        "projectType": "电商/订单系统",
+        "framework": "Flask",
+        "modules": [
+          "漏洞演示",
+          "用户认证",
+          "订单管理",
+          "支付",
+          "优惠券"
+        ],
+        "entryPoints": [],
+        "businessFlows": {
+          "订单流程": "创建订单 → 待支付 → 已支付 → 已发货 → 已完成",
+          "支付流程": "发起支付 → 调第三方 → 回调更新状态"
+        },
+        "stateMachine": {
+          "order": [
+            "PENDING",
+            "PAID",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "permissionModel": {},
+        "keyDataFlows": [
+          "HTTP 请求 → 控制器 → 服务层 → 数据库"
+        ],
+        "riskAreas": [
+          "SQL注入",
+          "XSS",
+          "SSRF",
+          "CSRF",
+          "命令注入",
+          "文件上传",
+          "SSTI",
+          "路径穿越",
+          "反序列化",
+          "状态迁移",
+          "金额处理",
+          "支付回调",
+          "幂等性",
+          "优惠券叠加",
+          "权限校验",
+          "会话管理",
+          "SQL 注入"
+        ],
+        "businessRules": [
+          "靶场环境故意包含漏洞",
+          "不应用于生产环境",
+          "订单金额必须 > 0",
+          "已取消订单不可发货",
+          "支付必须幂等",
+          "回调必须验签",
+          "优惠券不可叠加使用",
+          "资源访问必须校验属主"
+        ],
+        "_understoodFiles": [
+          "app.py"
+        ],
+        "_understoodAt": "2026-07-12T17:54:48.976Z"
+      },
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.915Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.915Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.922Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 1 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.922Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "项目理解完成: 电商/订单系统 | 5 模块 | 17 高风险区域 | 8 业务规则",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.976Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.977Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "源代码切片完成，共 4 个函数/方法",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.978Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "规则加载：120 条自定义 + 7 条内置",
+          "level": "info",
+          "at": "2026-07-12T17:54:48.985Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 app.py:sqli (行 2-11)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:54:48.987Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 app.py:xss (行 9-15)，匹配 127 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:54:49.995Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 app.py:ssti (行 13-19)，匹配 127 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:54:50.939Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 app.py:login (行 17-28)，匹配 26 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:54:51.892Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘完成：分析 4/4 片段，LLM 调用 75 次，发现 0 个漏洞（含业务逻辑）",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.420Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.421Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.421Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.421Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.421Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.422Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.422Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.422Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.422Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.423Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.423Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.429Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T17:54:53.430Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T17:54:53.430Z"
   }
 }
