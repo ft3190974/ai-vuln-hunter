@@ -67,6 +67,10 @@ class MockLlm extends ILlm {
       // ★ 复杂攻击场景构建（attack-scenario-builder）
       structured = buildAttackScenario(prompt);
       text = JSON.stringify(structured);
+    } else if (lower.includes("项目类型") || lower.includes("业务逻辑") && lower.includes("架构") || lower.includes("理解以下项目") || lower.includes("通读项目") || lower.includes("分析以下项目")) {
+      // ★ 项目理解（project-understand）
+      structured = understandProjectForMock(prompt);
+      text = JSON.stringify(structured);
     } else if (lower.includes("分析以下代码") || lower.includes("找出") && (lower.includes("漏洞") || lower.includes("逻辑"))) {
       // LLM 自主挖掘（llm-hunter）：按代码内容识别漏洞类型返回
       structured = analyzeCodeForMock(prompt);
@@ -305,6 +309,77 @@ function analyzeCCodeForMock(prompt) {
 
 function mkCVuln(title, severity, reasoning, scenario, line, exploitability, impact) {
   return { title, severity, line, reasoning, attackScenario: scenario, confidence: 0.85, exploitability, impact };
+}
+
+/**
+ * Mock：项目理解（从代码内容推断项目类型和业务逻辑）
+ */
+function understandProjectForMock(prompt) {
+  const codeMatch = prompt.match(/```[\s\S]*?```/) ||
+    prompt.match(/项目代码片段\n([\s\S]+?)\n\n请返回/) ||
+    prompt.match(/\/\/ === .* ===\n([\s\S]+)/);
+  const code = codeMatch ? (codeMatch[1] || codeMatch[0] || "") : prompt;
+  const codeLower = code.toLowerCase();
+
+  // 按代码特征推断项目类型
+  let projectType = "Web 应用";
+  const modules = [];
+  const riskAreas = [];
+  const businessRules = [];
+  const flows = {};
+  const states = {};
+
+  if (codeLower.includes("order") || codeLower.includes("订单")) {
+    projectType = "电商/订单系统";
+    modules.push("订单管理");
+    flows["订单流程"] = "创建订单 → 待支付 → 已支付 → 已发货 → 已完成";
+    states["order"] = ["PENDING", "PAID", "SHIPPED", "COMPLETED", "CANCELLED"];
+    riskAreas.push("状态迁移", "金额处理");
+    businessRules.push("订单金额必须 > 0", "已取消订单不可发货");
+  }
+  if (codeLower.includes("payment") || codeLower.includes("pay") || codeLower.includes("支付")) {
+    modules.push("支付");
+    flows["支付流程"] = "发起支付 → 调第三方 → 回调更新状态";
+    riskAreas.push("支付回调", "幂等性");
+    businessRules.push("支付必须幂等", "回调必须验签");
+  }
+  if (codeLower.includes("coupon") || codeLower.includes("discount") || codeLower.includes("优惠券")) {
+    modules.push("优惠券");
+    riskAreas.push("优惠券叠加");
+    businessRules.push("优惠券不可叠加使用");
+  }
+  if (codeLower.includes("user") || codeLower.includes("login") || codeLower.includes("auth")) {
+    modules.push("用户认证");
+    riskAreas.push("权限校验", "会话管理");
+    businessRules.push("资源访问必须校验属主");
+  }
+  if (codeLower.includes("search") || codeLower.includes("sql") || codeLower.includes("query")) {
+    riskAreas.push("SQL 注入");
+  }
+  if (codeLower.includes("exec") || codeLower.includes("system") || codeLower.includes("runtime")) {
+    riskAreas.push("命令注入");
+  }
+  if (codeLower.includes("malloc") || codeLower.includes("free") || codeLower.includes("strcpy")) {
+    projectType = "C/C++ 系统";
+    riskAreas.push("内存安全", "缓冲区溢出", "资源泄漏");
+    businessRules.push("malloc 必须配对 free", "禁止使用 strcpy");
+  }
+
+  if (modules.length === 0) modules.push("核心模块");
+  if (riskAreas.length === 0) riskAreas.push("输入校验", "权限控制");
+
+  return {
+    projectType,
+    framework: codeLower.includes("spring") ? "Spring Boot" : codeLower.includes("django") ? "Django" : codeLower.includes("express") ? "Express" : codeLower.includes("#include") ? "C/C++" : "未知",
+    modules: [...new Set(modules)],
+    entryPoints: [],
+    businessFlows: flows,
+    stateMachine: states,
+    permissionModel: {},
+    keyDataFlows: ["HTTP 请求 → 控制器 → 服务层 → 数据库"],
+    riskAreas: [...new Set(riskAreas)],
+    businessRules,
+  };
 }
 
 /**

@@ -60,7 +60,10 @@ async function detect(ctx, deps) {
         evidenceRequired: ["必须指出漏洞点"],
         confidenceBoost: 0.7,
       };
-      const prompt = rule.llmPrompt
+      const projectContext = ctx.projectContext?.projectType
+        ? `\n【项目上下文】类型: ${ctx.projectContext.projectType} | 业务规则: ${(ctx.projectContext.businessRules||[]).join("; ")} | 高风险区域: ${(ctx.projectContext.riskAreas||[]).join(", ")}`
+        : "";
+      const prompt = (rule.llmPrompt
         ? ruleEngine.renderPrompt(rule, {
             code: f.snippet?.code || "(无代码片段)",
             context: JSON.stringify(f.dataFlow || {}),
@@ -70,7 +73,7 @@ async function detect(ctx, deps) {
         : ruleEngine.renderPrompt(
             { llmPrompt: rule.llmPrompt, evidenceRequired: rule.evidenceRequired },
             { code: f.snippet?.code || "", category: f.category }
-          );
+          )) + projectContext;
 
       const result = await llm.complete(prompt, {
         difficulty: "high",

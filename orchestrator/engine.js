@@ -26,6 +26,7 @@ const learner = require("./agents/learner");
 const zeroDayHunter = require("./agents/zero-day-hunter");
 const llmHunter = require("./agents/llm-hunter");
 const attackScenarioBuilder = require("./agents/attack-scenario-builder");
+const projectUnderstand = require("./agents/project-understand");
 
 // 颜色（降级兼容 Windows）
 const C = (() => {
@@ -64,6 +65,7 @@ class OrchestratorEngine {
     // 状态 → handler 映射
     this.handlers = {
       INIT: (ctx) => dispatcher.normalize(ctx, this.deps),
+      PROJECT_UNDERSTAND: (ctx) => projectUnderstand.understand(ctx, this.deps),
       LLM_HUNT: (ctx) => llmHunter.hunt(ctx, this.deps),
       FILTER: (ctx) => dispatcher.filterFalsePositives(ctx, this.deps),
       DISPATCH: (ctx) => dispatcher.dispatch(ctx, this.deps),

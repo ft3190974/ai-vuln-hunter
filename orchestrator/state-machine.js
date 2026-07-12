@@ -9,7 +9,8 @@
 
 const STATES = [
   { name: "INIT", desc: "预处理 + 工具结果归一化（若有工具输出）" },
-  { name: "LLM_HUNT", desc: "★ LLM 自主挖掘（直接读代码，含业务逻辑，不依赖工具）" },
+  { name: "PROJECT_UNDERSTAND", desc: "★ 项目理解（LLM 先通读项目建立全局认知）" },
+  { name: "LLM_HUNT", desc: "★ LLM 自主挖掘（带项目上下文）" },
   { name: "FILTER", desc: "误报库前置过滤（防幻觉放大）" },
   { name: "DISPATCH", desc: "调度器分类分发（直通/深判/专项）" },
   { name: "DETECT", desc: "检测 Agent：structured 规则 + LLM 深判" },

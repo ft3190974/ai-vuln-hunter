@@ -20,10 +20,21 @@ const { matchKnownVulns } = require("./cve-matcher");
 
 /**
  * 判断一个 slice 是否值得用某条规则深查
- * - 规则无 sinks（或为空）：全查（业务逻辑类通常无具体 sink）
- * - 规则有 sinks：代码含任一 sink 关键词才查（省 LLM 调用）
+ * - 规则无 sinks（或为空）：全查
+ * - 规则有 sinks：代码含关键词才查
+ * - ★ 新增：高风险区域的函数（projectContext.riskAreas 匹配）强制查
  */
-function sliceMatchesRule(slice, rule) {
+function sliceMatchesRule(slice, rule, projectContext) {
+  // 高风险区域匹配：函数名/文件名命中 riskAreas 的，所有规则都查
+  if (projectContext?.riskAreas) {
+    const text = ((slice.functionName || "") + " " + (slice.file || "")).toLowerCase();
+    const inRiskArea = projectContext.riskAreas.some((area) => {
+      const a = area.toLowerCase();
+      return text.includes(a) || a.includes(text.split(" ")[0]);
+    });
+    if (inRiskArea) return true;
+  }
+  // 原逻辑：sinks 关键词匹配
   if (!rule.sinks || rule.sinks.length === 0) return true;
   const code = (slice.code || "").toLowerCase();
   return rule.sinks.some((s) => code.includes(String(s).toLowerCase()));
@@ -122,6 +133,12 @@ async function huntWithSlices(ctx, deps, slices, sourceInput) {
   const { findingStore, ruleEngine } = deps;
   const llm = getLlm();
 
+  // ★ 把 projectContext 注入每个 prompt
+  const pc = ctx.projectContext || {};
+  const projectSummary = pc.projectType
+    ? `\n【项目上下文】\n类型: ${pc.projectType}\n模块: ${(pc.modules||[]).join(", ")}\n业务流程: ${JSON.stringify(pc.businessFlows||{})}\n状态机: ${JSON.stringify(pc.stateMachine||{})}\n权限模型: ${JSON.stringify(pc.permissionModel||{})}\n高风险区域: ${(pc.riskAreas||[]).join(", ")}\n业务规则: ${(pc.businessRules||[]).join("; ")}`
+    : "";
+
   // 2. 加载规则：内置 + 用户自定义（统一从 ruleEngine 取 natural_language 类型）
   const allRulesInEngine = ruleEngine ? await ruleEngine.list() : [];
   const customRules = allRulesInEngine.filter((r) => r.type === "natural_language" && r.enabled);
@@ -154,8 +171,8 @@ async function huntWithSlices(ctx, deps, slices, sourceInput) {
   const dedupKey = (slice, v) => `${slice.file}:${v.line || slice.startLine}:${(v.title || "").slice(0, 30)}`;
 
   for (const slice of targetSlices) {
-    // 所有规则（内置 + 用户自定义）都参与，按 sinks 关键词初筛省调用
-    const rulesToAsk = mergedRules.filter((rule) => sliceMatchesRule(slice, rule));
+    // 所有规则（内置 + 用户自定义）都参与，按 sinks 关键词 + 高风险区域初筛
+    const rulesToAsk = mergedRules.filter((rule) => sliceMatchesRule(slice, rule, ctx.projectContext));
 
     slicesAnalyzed++;
     ctx.log_("LLM_HUNT", `分析 ${slice.file}:${slice.functionName} (行 ${slice.startLine}-${slice.endLine})，匹配 ${rulesToAsk.length} 条规则`, "debug");
@@ -169,12 +186,12 @@ async function huntWithSlices(ctx, deps, slices, sourceInput) {
 
       const prompt = rule.prompt
         .replace(/\{code\}/g, slice.code)
-        .replace(/\{language\}/g, slice.language);
+        .replace(/\{language\}/g, slice.language) + projectSummary;
 
       const result = await llm.complete(prompt, {
         difficulty: "high",
         jsonMode: true,
-        systemPrompt: "你是资深安全审计专家，专注业务逻辑漏洞。只基于给定代码判定，发现真问题，不要为凑数而报告不存在的漏洞。",
+        systemPrompt: "你是资深安全审计专家。基于项目上下文和代码分析漏洞。注意：结合业务流程和状态机判断是否存在逻辑漏洞（如状态绕过/金额篡改/越权）。只报告真实存在的漏洞。",
       });
       llmCalls++;
 

@@ -1,0 +1,141 @@
+{
+  "findings": [
+    {
+      "findingId": "F-2026-000001",
+      "createdAt": "2026-07-12T10:32:00.284Z",
+      "updatedAt": "2026-07-12T10:32:00.284Z",
+      "status": "confirmed",
+      "title": "[未校验属主的资源查询] 金额未校验非负/上限",
+      "category": "business_logic",
+      "severity": "critical",
+      "description": "amount 参数直接使用，未校验负数或上限。\n\n攻击场景: POST /create?amount=-100 套利",
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "构造负数 amount 参数",
+        "accessNeeded": "普通用户"
+      },
+      "impact": {
+        "assets": "支付/订单系统",
+        "worstCase": "余额无限增加，资金直接损失",
+        "remote": true,
+        "noAuth": false
+      },
+      "location": {
+        "targetType": "source",
+        "file": "OrderController.java",
+        "function": "(top-level)",
+        "startLine": 1,
+        "endLine": 1
+      },
+      "snippet": {
+        "code": "public class OrderController { public Order getOrder(Long id) { return repo.findById(id); } public void create(double amount) { Order o = new Order(); o.setAmount(amount); } public void ship(Long id) { Order o = repo.findById(id); o.setStatus(\"SHIPPED\"); } public String pay(Long id) { return paymentService.charge(id); } public List search(String kw) { String sql = \"SELECT * FROM o WHERE n LIKE %\" + kw + \"%\"; return db.query(sql); } }",
+        "language": "java",
+        "primaryLine": 1,
+        "startLine": 1,
+        "endLine": 1,
+        "contextType": "function",
+        "file": "OrderController.java",
+        "function": "(top-level)"
+      },
+      "fullContext": "public class OrderController { public Order getOrder(Long id) { return repo.findById(id); } public void create(double amount) { Order o = new Order(); o.setAmount(amount); } public void ship(Long id) { Order o = repo.findById(id); o.setStatus(\"SHIPPED\"); } public String pay(Long id) { return paymentService.charge(id); } public List search(String kw) { String sql = \"SELECT * FROM o WHERE n LIKE %\" + kw + \"%\"; return db.query(sql); } }",
+      "sources": [
+        {
+          "toolId": "llm-hunter",
+          "toolType": "SAST",
+          "rawRuleId": "BL-001",
+          "toolConfidence": 0.85,
+          "reportedAt": "2026-07-12T10:32:00.284Z"
+        }
+      ],
+      "confidence": 0.9,
+      "businessContext": {
+        "asset": "order",
+        "attackScenario": "POST /create?amount=-100 套利"
+      },
+      "reviewerNote": " [LLM 自主挖掘，置信度高直通]"
+    },
+    {
+      "findingId": "F-2026-000002",
+      "createdAt": "2026-07-12T10:32:01.318Z",
+      "updatedAt": "2026-07-12T10:32:01.318Z",
+      "status": "candidate",
+      "title": "[0-day 候选] business_logic 变种: 变种1：source 改为 JSON body 字段",
+      "category": "business_logic",
+      "severity": "critical",
+      "description": "基于 F-2026-000001（[未校验属主的资源查询] 金额未校验非负/上限）外推的语义变种。\n推理: \n新 source: http.body.data\n新 sink: JSON.parse → 动态字段访问",
+      "location": {
+        "targetType": "source",
+        "file": "OrderController.java",
+        "function": "(top-level)",
+        "startLine": 1,
+        "endLine": 1
+      },
+      "snippet": {
+        "code": "public class OrderController { public Order getOrder(Long id) { return repo.findById(id); } public void create(double amount) { Order o = new Order(); o.setAmount(amount); } public void ship(Long id) { Order o = repo.findById(id); o.setStatus(\"SHIPPED\"); } public String pay(Long id) { return paymentService.charge(id); } public List search(String kw) { String sql = \"SELECT * FROM o WHERE n LIKE %\" + kw + \"%\"; return db.query(sql); } }",
+        "language": "java",
+        "primaryLine": 1,
+        "startLine": 1,
+        "endLine": 1,
+        "contextType": "function",
+        "file": "OrderController.java",
+        "function": "(top-level)"
+      },
+      "sources": [
+        {
+          "toolId": "zero-day-hunter",
+          "toolType": "SAST",
+          "toolConfidence": 0.7,
+          "reportedAt": "2026-07-12T10:32:01.318Z"
+        }
+      ],
+      "confidence": 0.7999999999999999,
+      "isZeroDay": true,
+      "relatedFindings": [
+        "F-2026-000001"
+      ],
+      "linkedCves": []
+    },
+    {
+      "findingId": "F-2026-000003",
+      "createdAt": "2026-07-12T10:32:01.320Z",
+      "updatedAt": "2026-07-12T10:32:01.320Z",
+      "status": "candidate",
+      "title": "[0-day 候选] business_logic 变种: 变种2：绕过 WAF 的编码变体",
+      "category": "business_logic",
+      "severity": "critical",
+      "description": "基于 F-2026-000001（[未校验属主的资源查询] 金额未校验非负/上限）外推的语义变种。\n推理: \n新 source: http.header.X-Forwarded-For\n新 sink: 原始接口",
+      "location": {
+        "targetType": "source",
+        "file": "OrderController.java",
+        "function": "(top-level)",
+        "startLine": 1,
+        "endLine": 1
+      },
+      "snippet": {
+        "code": "public class OrderController { public Order getOrder(Long id) { return repo.findById(id); } public void create(double amount) { Order o = new Order(); o.setAmount(amount); } public void ship(Long id) { Order o = repo.findById(id); o.setStatus(\"SHIPPED\"); } public String pay(Long id) { return paymentService.charge(id); } public List search(String kw) { String sql = \"SELECT * FROM o WHERE n LIKE %\" + kw + \"%\"; return db.query(sql); } }",
+        "language": "java",
+        "primaryLine": 1,
+        "startLine": 1,
+        "endLine": 1,
+        "contextType": "function",
+        "file": "OrderController.java",
+        "function": "(top-level)"
+      },
+      "sources": [
+        {
+          "toolId": "zero-day-hunter",
+          "toolType": "SAST",
+          "toolConfidence": 0.65,
+          "reportedAt": "2026-07-12T10:32:01.320Z"
+        }
+      ],
+      "confidence": 0.75,
+      "isZeroDay": true,
+      "relatedFindings": [
+        "F-2026-000001"
+      ],
+      "linkedCves": []
+    }
+  ],
+  "counter": 3
+}
