@@ -30,7 +30,7 @@ export default function TasksPage() {
   }, []);
 
   const viewFindings = (scanId) => {
-    navigate(`/findings?scanId=${scanId}`);
+    navigate(`/tasks/${scanId}/findings`);
   };
 
   const deleteTask = async (scanId, e) => {

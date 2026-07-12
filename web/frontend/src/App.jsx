@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage.jsx";
 import ScanPage from "./pages/ScanPage.jsx";
 import FindingsPage from "./pages/FindingsPage.jsx";
 import TasksPage from "./pages/TasksPage.jsx";
+import TaskFindingsPage from "./pages/TaskFindingsPage.jsx";
 import StatusPage from "./pages/StatusPage.jsx";
 import RulesPage from "./pages/RulesPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/scan" element={<ScanPage />} />
           <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/tasks/:scanId/findings" element={<TaskFindingsPage />} />
           <Route path="/findings" element={<FindingsPage />} />
           <Route path="/rules" element={<RulesPage />} />
           <Route path="/status" element={<StatusPage />} />
