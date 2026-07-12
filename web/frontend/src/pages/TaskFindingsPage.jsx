@@ -14,21 +14,30 @@ function getVulnType(f) {
   if (f.sources?.[0]?.toolId === "ai-security-hunter") {
     const rule = f.sources?.[0]?.rawRuleId || "";
     if (rule.startsWith("AI-SKILL") || rule.startsWith("AI-MCP")) return "ai_mcp";
-    if (rule.startsWith("AI-MODEL")) return "ai_model";
+    if (rule.startsWith("AI-MODEL")) return "ai_code";
     return "ai_logic";
   }
-  if (f.category === "business_logic") return "logic";
-  if (f.sources?.[0]?.toolId === "llm-hunter" || f.sources?.[0]?.toolId === "c-hunter" || f.sources?.[0]?.toolId === "binary-hunter") return "logic";
-  return "logic";
+  if (f.sources?.[0]?.toolId === "web-pentest-hunter") return "web_pentest";
+  const cat = f.category || "";
+  if (cat === "business_logic") return "logic";
+  if (["race_condition", "integer_overflow", "config"].includes(cat)) return "quality";
+  if (["sqli", "cmdi", "xss", "path_traversal", "ssrf", "overflow", "uaf", "double_free",
+       "fmt_string", "deserialization", "csrf", "xxe", "redirect", "crypto_weak",
+       "hardcoded_secret", "prompt_injection", "jailbreak", "info_leak", "output_injection",
+       "unsafe_tool_use"].includes(cat)) return "code_vuln";
+  return "quality";
 }
 
 const TYPE_LABELS = {
   known: { label: "已知漏洞", color: "#3b82f6", icon: "📋" },
-  logic: { label: "逻辑漏洞", color: "#14b8a6", icon: "🧩" },
+  logic: { label: "业务逻辑", color: "#14b8a6", icon: "🧩" },
+  code_vuln: { label: "代码安全", color: "#ef4444", icon: "🔒" },
+  quality: { label: "代码质量", color: "#64748b", icon: "⚠️" },
   zeroday: { label: "0-day", color: "#fbbf24", icon: "⚡" },
-  ai_logic: { label: "LLM 应用逻辑", color: "#a855f7", icon: "🧠" },
+  ai_logic: { label: "LLM 逻辑", color: "#a855f7", icon: "🧠" },
+  ai_code: { label: "LLM 代码", color: "#6366f1", icon: "🤖" },
   ai_mcp: { label: "Skill/MCP", color: "#ec4899", icon: "🔧" },
-  ai_model: { label: "模型项目", color: "#6366f1", icon: "🤖" },
+  web_pentest: { label: "Web 渗透", color: "#f97316", icon: "🌐" },
 };
 
 export default function TaskFindingsPage() {
@@ -56,7 +65,7 @@ export default function TaskFindingsPage() {
   useEffect(() => { load(); }, [scanId, filter.status, filter.type]); // eslint-disable-line
 
   // 统计三类
-  const counts = { known: 0, logic: 0, zeroday: 0, ai_logic: 0, ai_mcp: 0, ai_model: 0 };
+  const counts = { known: 0, logic: 0, code_vuln: 0, quality: 0, zeroday: 0, ai_logic: 0, ai_code: 0, ai_mcp: 0, web_pentest: 0 };
   // 需要全量数据统计
   const [allData, setAllData] = useState([]);
   useEffect(() => {
@@ -112,7 +121,15 @@ export default function TaskFindingsPage() {
             <option value="">全部</option>
             <option value="known">📋 已知漏洞</option>
             <option value="logic">🧩 逻辑漏洞</option>
+            <option value="known">📋 已知漏洞</option>
+            <option value="logic">🧩 业务逻辑</option>
+            <option value="code_vuln">🔒 代码安全</option>
+            <option value="quality">⚠️ 代码质量</option>
             <option value="zeroday">⚡ 0-day</option>
+            <option value="ai_logic">🧠 LLM 逻辑</option>
+            <option value="ai_code">🤖 LLM 代码</option>
+            <option value="ai_mcp">🔧 Skill/MCP</option>
+            <option value="web_pentest">🌐 Web 渗透</option>
           </select>
         </div>
       </div>

@@ -52,32 +52,35 @@ class RuleEngine {
   async _seedBuiltinNaturalLanguage() {
     if (this._builtinSeeded) return;
     this._builtinSeeded = true;
-    const builtin = require("../agents/business-rules");
-    const all = [...builtin.BUSINESS_VULN_TYPES, ...builtin.HIGH_RISK_TYPES];
-    for (const r of all) {
-      // 跳过已存在的
-      if (this.rules.some((x) => x.ruleId === r.id)) continue;
-      // 推断 ruleDomain：BL 开头 = 逻辑漏洞，HR 开头 = 代码漏洞
-      const ruleDomain = r.id.startsWith("BL") ? "logic" : r.id.startsWith("HR") ? "code" : "code";
-      this.rules.push({
-        ruleId: r.id,
-        name: r.name,
-        type: "natural_language",
-        category: r.id.startsWith("BL") ? "business_logic" : "unknown",
-        severity: r.severity,
-        cwe: r.cwe,
-        languages: [],
-        ruleDomain,
-        enabled: true,
-        description: r.focus,
-        detectionHints: r.prompt, // 直接用原 prompt 作为检测提示
-        sinks: r.sinks || [],
-        exampleVulnerable: "",
-        exampleSafe: "",
-        version: "1.0.0",
-        origin: "builtin",
-        createdAt: new Date().toISOString(),
-      });
+
+    // 用扩充后的种子数据（6 类 × 20 条 = 120 条）
+    const seed = require("./rule-seed-data");
+    const domainMap = {
+      LOGIC_RULES: "logic", CODE_RULES: "code", QUALITY_RULES: "firmware",
+      AI_LOGIC_RULES: "ai_logic", AI_MCP_RULES: "ai_mcp", AI_MODEL_RULES: "ai_model",
+    };
+    for (const [listName, domain] of Object.entries(domainMap)) {
+      for (const r of seed[listName]) {
+        if (this.rules.some((x) => x.ruleId === r.id)) continue;
+        this.rules.push({
+          ruleId: r.id,
+          name: r.name,
+          type: "natural_language",
+          category: r.cat,
+          ruleDomain: domain,
+          severity: ["critical", "high"].includes(r.cat) ? "critical" : "high",
+          languages: [],
+          enabled: true,
+          description: r.desc,
+          detectionHints: `检测 ${r.name}：关注 ${r.sinks.join(", ")} 等关键词，检查是否缺少安全校验`,
+          sinks: r.sinks,
+          exampleVulnerable: "",
+          exampleSafe: "",
+          version: "1.0.0",
+          origin: "builtin",
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
   }
 

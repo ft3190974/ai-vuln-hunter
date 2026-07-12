@@ -10,30 +10,46 @@ import { api } from "../api.js";
 import SeverityBadge from "../components/SeverityBadge.jsx";
 import FindingDetail from "../components/FindingDetail.jsx";
 
-// 漏洞分类判定
+// 漏洞分类判定（10 类，按优先级精确匹配）
 function getVulnType(f) {
+  // 1. 0-day 最高优先级
   if (f.isZeroDay) return "zeroday";
+  // 2. 已知漏洞（有 CVE）
   if (f.linkedCves && f.linkedCves.length > 0) return "known";
-  // AI 安全漏洞（toolId = ai-security-hunter）
+  // 3. AI 安全漏洞（ai-security-hunter 发现）
   if (f.sources?.[0]?.toolId === "ai-security-hunter") {
     const rule = f.sources?.[0]?.rawRuleId || "";
-    if (rule.startsWith("AI-PROMPT") || rule.startsWith("AI-JAIL") || rule.startsWith("AI-INFO") || rule.startsWith("AI-OUTPUT") || rule.startsWith("AI-UNSAFE")) return "ai_logic";
     if (rule.startsWith("AI-SKILL") || rule.startsWith("AI-MCP")) return "ai_mcp";
-    if (rule.startsWith("AI-MODEL")) return "ai_model";
-    return "ai_logic";
+    if (rule.startsWith("AI-MODEL")) return "ai_code";
+    return "ai_logic"; // 提示词注入/越狱/信息泄露/输出注入/不安全函数调用
   }
-  if (f.category === "business_logic") return "logic";
-  if (f.sources?.[0]?.toolId === "llm-hunter" || f.sources?.[0]?.toolId === "c-hunter" || f.sources?.[0]?.toolId === "binary-hunter") return "logic";
-  return "logic";
+  // 4. Web 渗透漏洞（web-pentest-hunter 发现）
+  if (f.sources?.[0]?.toolId === "web-pentest-hunter") return "web_pentest";
+  // 5. 按 category 精确分类（不再笼统归 logic）
+  const cat = f.category || "";
+  // 业务逻辑漏洞
+  if (cat === "business_logic") return "logic";
+  // 代码质量缺陷（非安全问题）
+  if (["race_condition", "integer_overflow", "config"].includes(cat)) return "quality";
+  // 代码安全缺陷（注入/溢出/反序列化等）
+  if (["sqli", "cmdi", "xss", "path_traversal", "ssrf", "overflow", "uaf", "double_free",
+       "fmt_string", "deserialization", "csrf", "xxe", "redirect", "crypto_weak",
+       "hardcoded_secret", "prompt_injection", "jailbreak", "info_leak", "output_injection",
+       "unsafe_tool_use"].includes(cat)) return "code_vuln";
+  // 兜底：无法分类的归代码质量缺陷
+  return "quality";
 }
 
 const TYPE_CONFIG = {
-  known: { label: "已知漏洞", color: "#3b82f6", icon: "📋", desc: "有 CVE 编号的已公开漏洞（未来接 SCA 后自动填充）" },
-  logic: { label: "逻辑漏洞", color: "#14b8a6", icon: "🧩", desc: "LLM 自主发现的业务逻辑/代码缺陷" },
-  zeroday: { label: "0-day", color: "#fbbf24", icon: "⚡", desc: "基于已知漏洞变种外推的未知漏洞候选" },
-  ai_logic: { label: "LLM 应用逻辑", color: "#a855f7", icon: "🧠", desc: "提示词注入/越狱/信息泄露/输出注入" },
-  ai_mcp: { label: "Skill/MCP", color: "#ec4899", icon: "🔧", desc: "Skill 命令注入/MCP 路径穿越/权限提升" },
-  ai_model: { label: "模型项目", color: "#6366f1", icon: "🤖", desc: "推理服务 RCE/模型反序列化/未授权访问" },
+  known:      { label: "已知漏洞",       color: "#3b82f6", icon: "📋", desc: "有 CVE 编号的已公开漏洞（SCA 接入后填充）" },
+  logic:      { label: "业务逻辑漏洞",   color: "#14b8a6", icon: "🧩", desc: "LLM 发现的业务逻辑缺陷（状态机/金额/幂等/越权）" },
+  code_vuln:  { label: "代码安全缺陷",   color: "#ef4444", icon: "🔒", desc: "注入/溢出/反序列化/硬编码等安全漏洞" },
+  quality:    { label: "代码质量缺陷",   color: "#64748b", icon: "⚠️", desc: "竞态/整数溢出/配置等代码质量问题" },
+  zeroday:    { label: "0-day 漏洞",     color: "#fbbf24", icon: "⚡", desc: "基于已知漏洞变种外推的未知漏洞候选" },
+  ai_logic:   { label: "LLM 逻辑漏洞",  color: "#a855f7", icon: "🧠", desc: "提示词注入/越狱/信息泄露/输出注入" },
+  ai_code:    { label: "LLM 代码与文件漏洞", color: "#6366f1", icon: "🤖", desc: "推理服务 RCE/模型反序列化/未授权访问/数据投毒" },
+  ai_mcp:     { label: "Skill/MCP 漏洞", color: "#ec4899", icon: "🔧", desc: "Skill 命令注入/MCP 路径穿越/权限提升" },
+  web_pentest:{ label: "Web 渗透漏洞",   color: "#f97316", icon: "🌐", desc: "Web URL 实际渗透测试发现的漏洞" },
 };
 
 export default function FindingsPage() {
@@ -69,7 +85,7 @@ export default function FindingsPage() {
   useEffect(() => { load(); }, [filter]); // eslint-disable-line
 
   // 统计三类数量
-  const counts = { known: 0, logic: 0, zeroday: 0, ai_logic: 0, ai_mcp: 0, ai_model: 0 };
+  const counts = { known: 0, logic: 0, code_vuln: 0, quality: 0, zeroday: 0, ai_logic: 0, ai_code: 0, ai_mcp: 0, web_pentest: 0 };
   // 需要从全量数据统计（不受当前 filter 影响）
   const [allFindings, setAllFindings] = useState([]);
   useEffect(() => {
@@ -131,11 +147,14 @@ export default function FindingsPage() {
           <select value={filter.type} onChange={(e) => setFilter({ ...filter, type: e.target.value })}>
             <option value="">全部</option>
             <option value="known">📋 已知漏洞</option>
-            <option value="logic">🧩 逻辑漏洞</option>
-            <option value="zeroday">⚡ 0-day</option>
-            <option value="ai_logic">🧠 LLM 应用逻辑</option>
-            <option value="ai_mcp">🔧 Skill/MCP</option>
-            <option value="ai_model">🤖 模型项目</option>
+            <option value="logic">🧩 业务逻辑漏洞</option>
+            <option value="code_vuln">🔒 代码安全缺陷</option>
+            <option value="quality">⚠️ 代码质量缺陷</option>
+            <option value="zeroday">⚡ 0-day 漏洞</option>
+            <option value="ai_logic">🧠 LLM 逻辑漏洞</option>
+            <option value="ai_code">🤖 LLM 代码与文件漏洞</option>
+            <option value="ai_mcp">🔧 Skill/MCP 漏洞</option>
+            <option value="web_pentest">🌐 Web 渗透漏洞</option>
           </select>
         </div>
       </div>
