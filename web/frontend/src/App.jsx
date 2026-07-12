@@ -10,6 +10,7 @@ import TasksPage from "./pages/TasksPage.jsx";
 import TaskFindingsPage from "./pages/TaskFindingsPage.jsx";
 import StatusPage from "./pages/StatusPage.jsx";
 import RulesPage from "./pages/RulesPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 
 export default function App() {
@@ -63,6 +64,7 @@ export default function App() {
           <NavLink to="/tasks" className="nav-link">📋 任务管理</NavLink>
           <NavLink to="/findings" className="nav-link">漏洞清单</NavLink>
           <NavLink to="/rules" className="nav-link">⚙️ 规则配置</NavLink>
+          <NavLink to="/settings" className="nav-link">🔧 系统设置</NavLink>
           <NavLink to="/status" className="nav-link">引擎状态</NavLink>
         </nav>
         {user && (
@@ -81,6 +83,7 @@ export default function App() {
           <Route path="/tasks/:scanId/findings" element={<TaskFindingsPage />} />
           <Route path="/findings" element={<FindingsPage />} />
           <Route path="/rules" element={<RulesPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/status" element={<StatusPage />} />
           <Route path="/login" element={<LoginPage onLoggedIn={handleLoggedIn} />} />
         </Routes>

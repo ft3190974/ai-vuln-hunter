@@ -97,4 +97,25 @@ export const api = {
         return data;
       });
   },
+
+  // 系统设置 — LLM 配置
+  listLlmConfigs: () => request("/settings/llm"),
+  createLlmConfig: (cfg) => request("/settings/llm", { method: "POST", body: cfg }),
+  updateLlmConfig: (id, patch) => request(`/settings/llm/${id}`, { method: "PUT", body: patch }),
+  deleteLlmConfig: (id) => request(`/settings/llm/${id}`, { method: "DELETE" }),
+  testLlmConfig: (id) => request(`/settings/llm/${id}/test`, { method: "POST" }),
+
+  // 系统设置 — 工具集成配置
+  listToolConfigs: () => request("/settings/tools"),
+  createToolConfig: (cfg) => request("/settings/tools", { method: "POST", body: cfg }),
+  updateToolConfig: (id, patch) => request(`/settings/tools/${id}`, { method: "PUT", body: patch }),
+  deleteToolConfig: (id) => request(`/settings/tools/${id}`, { method: "DELETE" }),
+  testToolConfig: (id) => request(`/settings/tools/${id}/test`, { method: "POST" }),
+};
+      .then(async (resp) => {
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+        return data;
+      });
+  },
 };
