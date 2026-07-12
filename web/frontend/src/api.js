@@ -112,10 +112,3 @@ export const api = {
   deleteToolConfig: (id) => request(`/settings/tools/${id}`, { method: "DELETE" }),
   testToolConfig: (id) => request(`/settings/tools/${id}/test`, { method: "POST" }),
 };
-      .then(async (resp) => {
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
-        return data;
-      });
-  },
-};
