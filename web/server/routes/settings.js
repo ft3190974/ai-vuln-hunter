@@ -13,6 +13,15 @@
 // POST /api/settings/tools/:id/test  测试工具连通性
 
 const express = require("express");
+const path = require("path");
+
+// 引入编排引擎的 LLM 动态配置
+let setDynamicLlmConfig = null;
+try {
+  setDynamicLlmConfig = require("../../../orchestrator/llm").setDynamicLlmConfig;
+} catch (e) {
+  console.warn("[settings] 无法加载编排引擎 LLM 模块，动态切换不可用");
+}
 
 function settingsRoutes() {
   const router = express.Router();
@@ -37,6 +46,19 @@ function settingsRoutes() {
     createdAt: new Date().toISOString(),
   });
 
+  // 同步启用的 LLM 配置到编排引擎
+  function syncLlmToEngine() {
+    if (!setDynamicLlmConfig) return;
+    const enabled = llmConfigs.find((c) => c.enabled && c.provider !== "mock");
+    if (enabled) {
+      setDynamicLlmConfig(enabled);
+      console.log(`[settings] LLM 同步到引擎: ${enabled.name} (${enabled.provider})`);
+    } else {
+      setDynamicLlmConfig(null);
+      console.log("[settings] LLM 同步到引擎: mock（无启用的非 mock 配置）");
+    }
+  }
+
   router.get("/settings/llm", (_req, res) => res.json(llmConfigs));
 
   router.post("/settings/llm", (req, res) => {
@@ -50,6 +72,7 @@ function settingsRoutes() {
       enabled: b.enabled !== false, createdAt: new Date().toISOString(),
     };
     llmConfigs.push(cfg);
+    syncLlmToEngine();
     res.status(201).json(cfg);
   });
 
@@ -57,6 +80,7 @@ function settingsRoutes() {
     const cfg = llmConfigs.find((c) => c.id === req.params.id);
     if (!cfg) return res.status(404).json({ error: "配置不存在" });
     Object.assign(cfg, req.body, { updatedAt: new Date().toISOString() });
+    syncLlmToEngine();
     res.json(cfg);
   });
 
@@ -65,6 +89,7 @@ function settingsRoutes() {
     if (idx === -1) return res.status(404).json({ error: "配置不存在" });
     if (llmConfigs[idx].isDefault) return res.status(403).json({ error: "默认配置不可删除" });
     const deleted = llmConfigs.splice(idx, 1)[0];
+    syncLlmToEngine();
     res.json({ deleted: deleted.id });
   });
 
