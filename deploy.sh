@@ -58,14 +58,16 @@ echo "[1/6] 获取代码..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -d "$SCRIPT_DIR/.git" ]; then
   echo "  已在项目目录，拉取最新代码..."
-  git pull origin main || true
+  cd "$SCRIPT_DIR"
+  git fetch origin main
+  git reset --hard origin/main
+  echo "  ✓ 代码已更新到最新版"
 else
   echo "  克隆项目..."
   git clone https://github.com/ft3190974/ai-vuln-hunter.git /opt/ai-vuln-hunter || true
   cd /opt/ai-vuln-hunter
 fi
-APP_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$APP_DIR"
+APP_DIR="$(pwd)"
 echo "  ✓ 项目目录: $APP_DIR"
 
 # ── 2. 安装 Python 依赖（schema 校验用）──
