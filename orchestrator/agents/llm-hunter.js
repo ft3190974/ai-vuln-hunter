@@ -50,17 +50,18 @@ async function hunt(ctx, deps) {
 
   // 输入来源：ctx.sourceInput（由 engine.run 注入）
   const sourceInput = ctx.sourceInput;
-  if (!sourceInput || (!sourceInput.code && !sourceInput.path)) {
-    ctx.log_("LLM_HUNT", "无源代码输入，跳过 LLM 自主挖掘（走工具通道）", "info");
-    return ctx;
-  }
 
-  // ★ Web 渗透测试：URL 输入时实际发起请求测试
-  const isWebUrl = (sourceInput.type === "web") || /^https?:\/\//.test(sourceInput.path || sourceInput.code || sourceInput.url || "");
+  // ★ Web 渗透测试优先判断（URL 输入时 sourceInput 无 code/path，但 url 字段有值）
+  const isWebUrl = (sourceInput.type === "web") || /^https?:\/\//.test(sourceInput.url || sourceInput.path || sourceInput.code || "");
   if (isWebUrl && sourceInput.type !== "git") {
     ctx.log_("LLM_HUNT", "检测到 Web URL，启用 Web 渗透测试模式", "info");
     const webHunter = require("./web-pentest-hunter");
     return webHunter.hunt(ctx, deps);
+  }
+
+  if (!sourceInput || (!sourceInput.code && !sourceInput.path)) {
+    ctx.log_("LLM_HUNT", "无源代码输入，跳过 LLM 自主挖掘（走工具通道）", "info");
+    return ctx;
   }
 
   // ★ Git 仓库 clone（用户输入 Git 地址拉取源码）

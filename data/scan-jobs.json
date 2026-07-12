@@ -15376,5 +15376,772 @@
     },
     "error": null,
     "completedAt": "2026-07-12T10:33:37.826Z"
+  },
+  "web-debug-001": {
+    "scanId": "web-debug-001",
+    "status": "completed",
+    "startedAt": "2026-07-12T15:34:53.269Z",
+    "report": {
+      "scanId": "web-debug-001",
+      "startedAt": "2026-07-12T15:34:53.272Z",
+      "completedAt": "2026-07-12T15:34:53.298Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.277Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.277Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.289Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "无源代码输入，跳过 LLM 自主挖掘（走工具通道）",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.289Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.292Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.292Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.292Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.292Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.293Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.294Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.294Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.294Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.295Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.295Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成）",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.295Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.296Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.296Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.296Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.297Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.297Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.298Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 175/13边",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.298Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T15:34:53.298Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T15:34:53.298Z"
+  },
+  "web-fix-002": {
+    "scanId": "web-fix-002",
+    "status": "completed",
+    "startedAt": "2026-07-12T15:38:06.609Z",
+    "report": {
+      "scanId": "web-fix-002",
+      "startedAt": "2026-07-12T15:38:06.609Z",
+      "completedAt": "2026-07-12T15:38:17.031Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": null,
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.611Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.611Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.615Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 0 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.615Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.616Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "检测到 Web URL，启用 Web 渗透测试模式",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.616Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "Web 渗透测试开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.620Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取目标: http://testphp.vulnweb.com",
+          "level": "info",
+          "at": "2026-07-12T15:38:06.620Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取完成：1 个接口，0 个表单",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.634Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "Web 渗透完成：发送 0 个请求，发现 0 个漏洞",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.988Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.989Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.989Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.989Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.989Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.990Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.990Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.990Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.990Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.991Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T15:38:16.991Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.027Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.027Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.028Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.028Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.029Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.029Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.030Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.031Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T15:38:17.031Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T15:38:17.032Z"
+  },
+  "web-fix-003": {
+    "scanId": "web-fix-003",
+    "status": "completed",
+    "startedAt": "2026-07-12T15:39:59.803Z",
+    "report": {
+      "scanId": "web-fix-003",
+      "startedAt": "2026-07-12T15:39:59.803Z",
+      "completedAt": "2026-07-12T15:42:10.269Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": null,
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.804Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.804Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.810Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 0 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.810Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.810Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "检测到 Web URL，启用 Web 渗透测试模式",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.810Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "Web 渗透测试开始",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.812Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取目标: http://testphp.vulnweb.com",
+          "level": "info",
+          "at": "2026-07-12T15:39:59.812Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取完成：1 个接口，0 个表单",
+          "level": "info",
+          "at": "2026-07-12T15:40:09.819Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取结果不足，尝试常见测试路径...",
+          "level": "info",
+          "at": "2026-07-12T15:40:09.819Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "补充探测后：1 个接口，0 个表单",
+          "level": "info",
+          "at": "2026-07-12T15:42:09.917Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "Web 渗透完成：发送 0 个请求，发现 0 个漏洞",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.261Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.262Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.263Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.263Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.267Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.267Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.267Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.267Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.267Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.267Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.268Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.268Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T15:42:10.269Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T15:42:10.269Z"
+  },
+  "web-fix-004": {
+    "scanId": "web-fix-004",
+    "status": "completed",
+    "startedAt": "2026-07-12T15:45:32.937Z",
+    "report": {
+      "scanId": "web-fix-004",
+      "startedAt": "2026-07-12T15:45:32.937Z",
+      "completedAt": "2026-07-12T15:49:50.685Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": null,
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.937Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.937Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.942Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 0 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.942Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.942Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "检测到 Web URL，启用 Web 渗透测试模式",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.942Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "Web 渗透测试开始",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.944Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取目标: http://testphp.vulnweb.com",
+          "level": "info",
+          "at": "2026-07-12T15:45:32.944Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取完成：1 个接口，0 个表单",
+          "level": "info",
+          "at": "2026-07-12T15:45:42.959Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "爬取结果不足，尝试常见测试路径...",
+          "level": "info",
+          "at": "2026-07-12T15:45:42.959Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "补充探测后：1 个接口，0 个表单",
+          "level": "info",
+          "at": "2026-07-12T15:47:43.081Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "Web 渗透完成：发送 12 个请求，发现 0 个漏洞",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.677Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.677Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.677Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.677Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.677Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.678Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.678Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.678Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.678Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.679Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.679Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.684Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.684Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T15:49:50.685Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T15:49:50.685Z"
   }
 }
