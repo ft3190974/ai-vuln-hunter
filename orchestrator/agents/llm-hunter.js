@@ -44,6 +44,14 @@ async function hunt(ctx, deps) {
     return ctx;
   }
 
+  // ★ Web 渗透测试：URL 输入时实际发起请求测试
+  const isWebUrl = (sourceInput.type === "web") || /^https?:\/\//.test(sourceInput.path || sourceInput.code || sourceInput.url || "");
+  if (isWebUrl) {
+    ctx.log_("LLM_HUNT", "检测到 Web URL，启用 Web 渗透测试模式", "info");
+    const webHunter = require("./web-pentest-hunter");
+    return webHunter.hunt(ctx, deps);
+  }
+
   // ★ Java 二进制（.jar/.class）：反编译后走源码分析
   const isJavaBinary = isJavaJarOrClass(sourceInput);
   if (isJavaBinary) {

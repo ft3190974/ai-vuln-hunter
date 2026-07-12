@@ -29,9 +29,11 @@ function ResultStat({ label, value }) {
 }
 
 export default function ScanPage() {
-  const [mode, setMode] = useState("upload"); // upload | path | code
-  const [uploadedFile, setUploadedFile] = useState(null); // {path, type, filename, sourceFiles}
+  const [mode, setMode] = useState("upload"); // upload | path | code | web
+  const [uploadedFile, setUploadedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [webUrl, setWebUrl] = useState("");
+  const [authConfirmed, setAuthConfirmed] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [manualPath, setManualPath] = useState("");
   const [code, setCode] = useState("");
@@ -91,6 +93,9 @@ export default function ScanPage() {
           // binary
           sourceInput = { path: f.path, file: f.filename };
         }
+      } else if (mode === "web" && webUrl.trim()) {
+        if (!authConfirmed) { setError("请先勾选授权确认"); setSubmitting(false); return; }
+        sourceInput = { type: "web", url: webUrl.trim() };
       } else if (mode === "path" && manualPath.trim()) {
         sourceInput = { path: manualPath.trim() };
       } else if (mode === "code" && code.trim()) {
@@ -140,7 +145,7 @@ export default function ScanPage() {
   const reachedStates = new Set();
   if (job?.report?.log) job.report.log.forEach((l) => reachedStates.add(l.state));
 
-  const canSubmit = (mode === "upload" && uploadedFile) || (mode === "path" && manualPath.trim()) || (mode === "code" && code.trim());
+  const canSubmit = (mode === "upload" && uploadedFile) || (mode === "path" && manualPath.trim()) || (mode === "code" && code.trim()) || (mode === "web" && webUrl.trim() && authConfirmed);
 
   return (
     <div>
@@ -156,6 +161,9 @@ export default function ScanPage() {
         </button>
         <button className={mode === "code" ? "" : "secondary"} onClick={() => setMode("code")}>
           ✏️ 粘贴代码
+        </button>
+        <button className={mode === "web" ? "" : "secondary"} onClick={() => setMode("web")}>
+          🌐 Web 渗透
         </button>
       </div>
 
@@ -248,6 +256,32 @@ export default function ScanPage() {
             <label>源代码（粘贴要分析的代码）</label>
             <textarea value={code} onChange={(e) => setCode(e.target.value)}
               style={{ minHeight: 280, fontFamily: "Consolas, monospace" }} />
+          </div>
+        )}
+
+        {/* Web 渗透测试模式 */}
+        {mode === "web" && (
+          <div>
+            <div className="msg msg-error" style={{ marginBottom: 16 }}>
+              ⚠️ <strong>法律警告</strong>：Web 渗透测试会对目标发起真实 HTTP 请求。
+              仅可用于你拥有所有权或已获得书面授权的目标。未经授权的渗透测试是违法行为。
+            </div>
+            <div className="form-group">
+              <label>目标 URL</label>
+              <input value={webUrl} onChange={(e) => setWebUrl(e.target.value)}
+                placeholder="http://target-app.example.com" />
+            </div>
+            <div className="form-group" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input type="checkbox" id="authConfirm" checked={authConfirmed}
+                onChange={(e) => setAuthConfirmed(e.target.checked)}
+                style={{ width: "auto" }} />
+              <label htmlFor="authConfirm" style={{ marginBottom: 0, color: authConfirmed ? "#86efac" : "#fca5a5" }}>
+                我确认拥有该目标的所有权或已获得书面授权进行安全测试
+              </label>
+            </div>
+            <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              系统将：① 爬取目标页面提取接口/参数 ② LLM 分析构造攻击 ③ 实际发送请求验证漏洞
+            </p>
           </div>
         )}
 
