@@ -5,17 +5,19 @@ import { api } from "../api.js";
 import { useCountUp } from "../hooks/useCountUp.js";
 
 const STATES = [
-  ["INIT", "预处理"],
-  ["LLM_HUNT", "★ LLM 自主挖掘"],
-  ["FILTER", "误报库过滤"],
-  ["DISPATCH", "分类分发"],
-  ["DETECT", "检测"],
-  ["RAG_MATCH", "图谱关联"],
-  ["ZERO_DAY", "0-day 变种"],
-  ["VERIFY", "验证 + POC"],
-  ["FIX", "修复"],
-  ["LEARN", "学习闭环"],
-  ["REPORT", "报告"],
+  ["INIT", "预处理", "1-3s", "fast"],
+  ["PROJECT_UNDERSTAND", "项目理解", "5-15s", "fast"],
+  ["LLM_HUNT", "★ LLM 自主挖掘", "30s-5min", "slow"],
+  ["FILTER", "误报库过滤", "1-2s", "fast"],
+  ["DISPATCH", "分类分发", "1s", "fast"],
+  ["DETECT", "深度检测", "10-60s", "medium"],
+  ["RAG_MATCH", "图谱关联", "1-3s", "fast"],
+  ["ZERO_DAY", "0-day 变种挖掘", "10-60s", "medium"],
+  ["VERIFY", "验证 + POC + 0-day验证", "10-90s", "medium"],
+  ["ATTACK_SCENARIO", "攻击路径构建", "5-15s", "fast"],
+  ["FIX", "修复 + 修复验证", "10-60s", "medium"],
+  ["LEARN", "学习闭环", "5-15s", "fast"],
+  ["REPORT", "报告", "1s", "fast"],
 ];
 
 function ResultStat({ label, value }) {
@@ -150,6 +152,20 @@ export default function ScanPage() {
 
   const reachedStates = new Set();
   if (job?.report?.log) job.report.log.forEach((l) => reachedStates.add(l.state));
+
+  // 计算每个状态的实际耗时
+  const stateTimings = {};
+  if (job?.report?.log) {
+    const times = job.report.log.filter((l) => l.at).map((l) => ({ state: l.state, at: new Date(l.at).getTime() })).sort((a, b) => a.at - b.at);
+    for (let i = 0; i < times.length; i++) {
+      const next = times.slice(i + 1).find((t) => t.state !== times[i].state);
+      const dur = next ? next.at - times[i].at : 0;
+      if (!stateTimings[times[i].state]) stateTimings[times[i].state] = dur;
+    }
+  }
+  const speedColor = { fast: "#86efac", medium: "#fde68a", slow: "#fca5a5" };
+  const startedAt = job?.startedAt ? new Date(job.startedAt).getTime() : 0;
+  const elapsedSec = startedAt ? Math.round((Date.now() - startedAt) / 1000) : 0;
 
   const canSubmit = gitUrl.trim() || (mode === "upload" && uploadedFile) || (mode === "path" && manualPath.trim()) || (mode === "code" && code.trim()) || (mode === "web" && webUrl.trim() && authConfirmed);
 
@@ -322,16 +338,37 @@ export default function ScanPage() {
       )}
 
       {/* 编排进度 */}
-      {job?.report?.log && (
+        {job?.report?.log && (
         <div className="card">
-          <h2>编排进度</h2>
+          <h2>编排进度 <span style={{ fontSize: 13, color: "var(--text-dim)", marginLeft: 12 }}>已耗时 {elapsedSec}s</span></h2>
           <ul className="timeline">
-            {STATES.map(([state, desc]) => (
-              <li key={state} className={`timeline-item ${reachedStates.has(state) ? "done" : ""}`}>
-                <div className="timeline-state">{state}</div>
-                <div className="timeline-desc">{desc}</div>
-              </li>
-            ))}
+            {STATES.map(([state, desc, estimate, speed]) => {
+              const isDone = reachedStates.has(state);
+              const actualMs = stateTimings[state] || 0;
+              const actualSec = Math.round(actualMs / 1000);
+              return (
+                <li key={state} className={`timeline-item ${isDone ? "done" : ""}`}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <span className="timeline-state">{state}</span>
+                      <span className="timeline-desc" style={{ marginLeft: 8 }}>{desc}</span>
+                    </div>
+                    <div style={{ fontSize: 11, display: "flex", gap: 8, alignItems: "center" }}>
+                      {/* 预估时间 */}
+                      <span style={{ color: "var(--text-muted)" }}>预估 {estimate}</span>
+                      {/* 实际耗时 */}
+                      {isDone && actualSec > 0 && (
+                        <span style={{ color: speedColor[speed] || "var(--text-dim)" }}>
+                          实际 {actualSec}s
+                        </span>
+                      )}
+                      {/* 速度指示色块 */}
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: speedColor[speed] || "#64748b", display: "inline-block" }} />
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
