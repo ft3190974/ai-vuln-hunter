@@ -24,6 +24,9 @@ const DOMAIN_CONFIG = {
   logic: { label: "逻辑漏洞规则", short: "逻辑漏洞", icon: "🧩", color: "#14b8a6", desc: "业务逻辑/状态机/金额/幂等等 SAST 发现不了的" },
   code: { label: "代码漏洞规则", short: "代码漏洞", icon: "💻", color: "#3b82f6", desc: "注入/溢出/反序列化等代码层面缺陷" },
   firmware: { label: "固件漏洞规则", short: "固件漏洞", icon: "🔌", color: "#f97316", desc: "硬编码/弱加密/暴露面等二进制固件缺陷" },
+  ai_logic: { label: "LLM 应用逻辑漏洞", short: "LLM 逻辑", icon: "🧠", color: "#a855f7", desc: "提示词注入/越狱/信息泄露/输出注入/不安全函数调用" },
+  ai_mcp: { label: "Skill/MCP 漏洞", short: "Skill/MCP", icon: "🔧", color: "#ec4899", desc: "Skill 命令注入/MCP 路径穿越/权限提升/数据泄露" },
+  ai_model: { label: "模型项目代码漏洞", short: "模型项目", icon: "🤖", color: "#6366f1", desc: "推理服务 RCE/模型反序列化/未授权访问/数据投毒" },
 };
 
 const CATEGORY_OPTIONS = {
@@ -49,6 +52,24 @@ const CATEGORY_OPTIONS = {
     { value: "config", label: "配置缺陷" },
     { value: "hardcoded_secret", label: "硬编码凭据" },
     { value: "crypto_weak", label: "弱加密" },
+  ],
+  ai_logic: [
+    { value: "prompt_injection", label: "提示词注入" },
+    { value: "jailbreak", label: "越狱防护" },
+    { value: "info_leak", label: "信息泄露" },
+    { value: "output_injection", label: "输出注入" },
+    { value: "unsafe_tool_use", label: "不安全函数调用" },
+  ],
+  ai_mcp: [
+    { value: "cmdi", label: "Skill 命令注入" },
+    { value: "path_traversal", label: "MCP 路径穿越" },
+    { value: "authz", label: "MCP 权限提升" },
+  ],
+  ai_model: [
+    { value: "cmdi", label: "推理服务 RCE" },
+    { value: "deserialization", label: "模型反序列化" },
+    { value: "authz", label: "未授权访问" },
+    { value: "business_logic", label: "数据投毒" },
   ],
 };
 
@@ -145,7 +166,7 @@ export default function RulesPage() {
 
   // ── 列表 ──
   const filtered = domainFilter ? rules.filter((r) => (r.ruleDomain || "logic") === domainFilter) : rules;
-  const counts = { logic: 0, code: 0, firmware: 0 };
+  const counts = { logic: 0, code: 0, firmware: 0, ai_logic: 0, ai_mcp: 0, ai_model: 0 };
   for (const r of rules) counts[r.ruleDomain || "logic"]++;
 
   return (
@@ -155,8 +176,8 @@ export default function RulesPage() {
         <button onClick={startCreate}>+ 新建规则</button>
       </div>
 
-      {/* 三分类汇总卡 */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+      {/* 六分类汇总卡 */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
         {Object.entries(DOMAIN_CONFIG).map(([key, cfg]) => (
           <div key={key} onClick={() => setDomainFilter(domainFilter === key ? "" : key)} className="stat-card"
             style={{ cursor: "pointer", borderTop: "3px solid " + cfg.color, background: domainFilter === key ? cfg.color + "15" : "var(--bg-elev)" }}>

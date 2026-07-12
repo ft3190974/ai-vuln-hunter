@@ -10,9 +10,15 @@ import FindingDetail from "../components/FindingDetail.jsx";
 
 function getVulnType(f) {
   if (f.isZeroDay) return "zeroday";
-  if (f.category === "business_logic") return "logic";
   if (f.linkedCves && f.linkedCves.length > 0) return "known";
-  if (f.sources && f.sources[0] && ["llm-hunter", "c-hunter", "binary-hunter"].includes(f.sources[0].toolId)) return "logic";
+  if (f.sources?.[0]?.toolId === "ai-security-hunter") {
+    const rule = f.sources?.[0]?.rawRuleId || "";
+    if (rule.startsWith("AI-SKILL") || rule.startsWith("AI-MCP")) return "ai_mcp";
+    if (rule.startsWith("AI-MODEL")) return "ai_model";
+    return "ai_logic";
+  }
+  if (f.category === "business_logic") return "logic";
+  if (f.sources?.[0]?.toolId === "llm-hunter" || f.sources?.[0]?.toolId === "c-hunter" || f.sources?.[0]?.toolId === "binary-hunter") return "logic";
   return "logic";
 }
 
@@ -20,6 +26,9 @@ const TYPE_LABELS = {
   known: { label: "已知漏洞", color: "#3b82f6", icon: "📋" },
   logic: { label: "逻辑漏洞", color: "#14b8a6", icon: "🧩" },
   zeroday: { label: "0-day", color: "#fbbf24", icon: "⚡" },
+  ai_logic: { label: "LLM 应用逻辑", color: "#a855f7", icon: "🧠" },
+  ai_mcp: { label: "Skill/MCP", color: "#ec4899", icon: "🔧" },
+  ai_model: { label: "模型项目", color: "#6366f1", icon: "🤖" },
 };
 
 export default function TaskFindingsPage() {
@@ -47,7 +56,7 @@ export default function TaskFindingsPage() {
   useEffect(() => { load(); }, [scanId, filter.status, filter.type]); // eslint-disable-line
 
   // 统计三类
-  const counts = { known: 0, logic: 0, zeroday: 0 };
+  const counts = { known: 0, logic: 0, zeroday: 0, ai_logic: 0, ai_mcp: 0, ai_model: 0 };
   // 需要全量数据统计
   const [allData, setAllData] = useState([]);
   useEffect(() => {

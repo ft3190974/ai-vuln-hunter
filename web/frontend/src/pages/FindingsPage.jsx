@@ -13,17 +13,27 @@ import FindingDetail from "../components/FindingDetail.jsx";
 // 漏洞分类判定
 function getVulnType(f) {
   if (f.isZeroDay) return "zeroday";
-  if (f.category === "business_logic") return "logic";
   if (f.linkedCves && f.linkedCves.length > 0) return "known";
-  // 无 CVE 号 + 非 business_logic + 非 0-day → 也算逻辑（LLM 发现的代码缺陷）
+  // AI 安全漏洞（toolId = ai-security-hunter）
+  if (f.sources?.[0]?.toolId === "ai-security-hunter") {
+    const rule = f.sources?.[0]?.rawRuleId || "";
+    if (rule.startsWith("AI-PROMPT") || rule.startsWith("AI-JAIL") || rule.startsWith("AI-INFO") || rule.startsWith("AI-OUTPUT") || rule.startsWith("AI-UNSAFE")) return "ai_logic";
+    if (rule.startsWith("AI-SKILL") || rule.startsWith("AI-MCP")) return "ai_mcp";
+    if (rule.startsWith("AI-MODEL")) return "ai_model";
+    return "ai_logic";
+  }
+  if (f.category === "business_logic") return "logic";
   if (f.sources?.[0]?.toolId === "llm-hunter" || f.sources?.[0]?.toolId === "c-hunter" || f.sources?.[0]?.toolId === "binary-hunter") return "logic";
   return "logic";
 }
 
 const TYPE_CONFIG = {
-  known:   { label: "已知漏洞", color: "#3b82f6", icon: "📋", desc: "有 CVE 编号的已公开漏洞（未来接 SCA 后自动填充）" },
-  logic:   { label: "逻辑漏洞", color: "#14b8a6", icon: "🧩", desc: "LLM 自主发现的业务逻辑/代码缺陷（SAST 工具发现不了的）" },
-  zeroday: { label: "0-day",    color: "#fbbf24", icon: "⚡", desc: "基于已知漏洞变种外推的未知漏洞候选" },
+  known: { label: "已知漏洞", color: "#3b82f6", icon: "📋", desc: "有 CVE 编号的已公开漏洞（未来接 SCA 后自动填充）" },
+  logic: { label: "逻辑漏洞", color: "#14b8a6", icon: "🧩", desc: "LLM 自主发现的业务逻辑/代码缺陷" },
+  zeroday: { label: "0-day", color: "#fbbf24", icon: "⚡", desc: "基于已知漏洞变种外推的未知漏洞候选" },
+  ai_logic: { label: "LLM 应用逻辑", color: "#a855f7", icon: "🧠", desc: "提示词注入/越狱/信息泄露/输出注入" },
+  ai_mcp: { label: "Skill/MCP", color: "#ec4899", icon: "🔧", desc: "Skill 命令注入/MCP 路径穿越/权限提升" },
+  ai_model: { label: "模型项目", color: "#6366f1", icon: "🤖", desc: "推理服务 RCE/模型反序列化/未授权访问" },
 };
 
 export default function FindingsPage() {
@@ -59,7 +69,7 @@ export default function FindingsPage() {
   useEffect(() => { load(); }, [filter]); // eslint-disable-line
 
   // 统计三类数量
-  const counts = { known: 0, logic: 0, zeroday: 0 };
+  const counts = { known: 0, logic: 0, zeroday: 0, ai_logic: 0, ai_mcp: 0, ai_model: 0 };
   // 需要从全量数据统计（不受当前 filter 影响）
   const [allFindings, setAllFindings] = useState([]);
   useEffect(() => {
@@ -123,6 +133,9 @@ export default function FindingsPage() {
             <option value="known">📋 已知漏洞</option>
             <option value="logic">🧩 逻辑漏洞</option>
             <option value="zeroday">⚡ 0-day</option>
+            <option value="ai_logic">🧠 LLM 应用逻辑</option>
+            <option value="ai_mcp">🔧 Skill/MCP</option>
+            <option value="ai_model">🤖 模型项目</option>
           </select>
         </div>
       </div>
