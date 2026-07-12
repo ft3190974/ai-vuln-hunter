@@ -23,7 +23,7 @@ class RuleEngine {
       {
         ruleId: "INJ-SQLI-001", name: "SQL 字符串拼接注入",
         type: "structured", category: "sqli", severity: "critical", cwe: "CWE-89",
-        languages: ["java", "python", "go"],
+        languages: ["java", "python", "go"], ruleDomain: "code",
         source: ["http.param.*", "request.getParameter"],
         sink: ["execute", "executeQuery", "createStatement"],
         condition: { pathExists: true, hasValidation: { type: "regex", expect: false } },
@@ -34,7 +34,7 @@ class RuleEngine {
       {
         ruleId: "AUTHZ-IDOR-001", name: "水平越权（IDOR）",
         type: "structured", category: "authz", severity: "high", cwe: "CWE-639",
-        languages: ["java", "python", "go"],
+        languages: ["java", "python", "go"], ruleDomain: "code",
         source: ["http.param.id", "@PathVariable"],
         sink: ["findById", "getById", "findOne"],
         condition: { pathExists: true, hasValidation: { type: "auth", expect: false } },
@@ -57,6 +57,8 @@ class RuleEngine {
     for (const r of all) {
       // 跳过已存在的
       if (this.rules.some((x) => x.ruleId === r.id)) continue;
+      // 推断 ruleDomain：BL 开头 = 逻辑漏洞，HR 开头 = 代码漏洞
+      const ruleDomain = r.id.startsWith("BL") ? "logic" : r.id.startsWith("HR") ? "code" : "code";
       this.rules.push({
         ruleId: r.id,
         name: r.name,
@@ -65,6 +67,7 @@ class RuleEngine {
         severity: r.severity,
         cwe: r.cwe,
         languages: [],
+        ruleDomain,
         enabled: true,
         description: r.focus,
         detectionHints: r.prompt, // 直接用原 prompt 作为检测提示

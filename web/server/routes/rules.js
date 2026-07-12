@@ -17,12 +17,13 @@ function ruleRoutes({ engine }) {
   // 列出规则
   router.get("/rules", async (req, res) => {
     try {
-      const { enabled, category, source } = req.query;
+      const { enabled, category, source, ruleDomain } = req.query;
       let rules = await engine.ruleEngine.list();
       if (enabled === "true") rules = rules.filter((r) => r.enabled);
       if (enabled === "false") rules = rules.filter((r) => !r.enabled);
       if (category) rules = rules.filter((r) => r.category === category);
       if (source) rules = rules.filter((r) => r.origin === source);
+      if (ruleDomain) rules = rules.filter((r) => r.ruleDomain === ruleDomain);
       res.json(rules);
     } catch (e) {
       res.status(500).json({ error: e.message });
@@ -42,6 +43,7 @@ function ruleRoutes({ engine }) {
         name: b.name,
         type: "natural_language",
         category: b.category || "unknown",
+        ruleDomain: b.ruleDomain || "logic", // logic / code / firmware
         severity: b.severity || "medium",
         languages: Array.isArray(b.languages) ? b.languages : [],
         enabled: b.enabled !== false,
