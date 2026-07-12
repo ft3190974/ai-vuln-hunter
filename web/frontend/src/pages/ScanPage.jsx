@@ -91,7 +91,7 @@ export default function ScanPage() {
         if (language) sourceInput.language = language;
       } else if (mode === "upload" && uploadedFile) {
         const f = uploadedFile;
-        if (f.type === "source_dir") {
+        if (f.type === "source_dir" || f.type === "source_file") {
           sourceInput = { path: f.path };
         } else if (f.type === "jar") {
           sourceInput = { path: f.path, file: f.filename };
@@ -237,6 +237,8 @@ export default function ScanPage() {
                   <p style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 4 }}>
                     {uploadedFile.type === "source_dir"
                       ? `源码目录（${uploadedFile.sourceFiles || 0} 个源码文件）`
+                      : uploadedFile.type === "source_file"
+                      ? `源码文件（${(uploadedFile.size / 1024).toFixed(1)} KB）`
                       : uploadedFile.type === "jar"
                       ? `Java 二进制（${(uploadedFile.size / 1024).toFixed(1)} KB）`
                       : `二进制文件（${(uploadedFile.size / 1024).toFixed(1)} KB）`}

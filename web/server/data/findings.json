@@ -1,0 +1,5412 @@
+{
+  "findings": [
+    {
+      "findingId": "F-2026-000001",
+      "createdAt": "2026-07-12T10:02:23.642Z",
+      "updatedAt": "2026-07-12T10:02:23.642Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: # ********************ml",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1479744 发现硬编码 URL。\n脱敏值: # ********************ml（长度 55）\n原始证据: # Your alt-svc cache. https://curl.se/docs/alt-svc.html\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x169440"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.642Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000001",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 116,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:23.878Z"
+      },
+      "patchId": "PATCH-2026-000001",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000002",
+      "createdAt": "2026-07-12T10:02:23.645Z",
+      "updatedAt": "2026-07-12T10:02:23.645Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: # ********************ml",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1480532 发现硬编码 URL。\n脱敏值: # ********************ml（长度 40）\n原始证据: # https://curl.se/docs/http-cookies.html\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x169754"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.645Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000002",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 102,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.037Z"
+      },
+      "patchId": "PATCH-2026-000002",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000003",
+      "createdAt": "2026-07-12T10:02:23.648Z",
+      "updatedAt": "2026-07-12T10:02:23.648Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码证书: --********************--",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1511080 发现硬编码证书。\n脱敏值: --********************--（长度 27）\n原始证据: -----BEGIN CERTIFICATE-----\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x170ea8"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.647Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码证书",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000003",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 92,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.181Z"
+      },
+      "patchId": "PATCH-2026-000003",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000004",
+      "createdAt": "2026-07-12T10:02:23.650Z",
+      "updatedAt": "2026-07-12T10:02:23.650Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************cc",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1590872 发现硬编码 URL。\n脱敏值: ht********************cc（长度 29）\n原始证据: https://pc-api.wondershare.cc\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x184658"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.650Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000004",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 87,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.327Z"
+      },
+      "patchId": "PATCH-2026-000004",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000005",
+      "createdAt": "2026-07-12T10:02:23.652Z",
+      "updatedAt": "2026-07-12T10:02:23.652Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************om",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1590940 发现硬编码 URL。\n脱敏值: ht********************om（长度 25）\n原始证据: https://pc-api.300624.com\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x18469c"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.652Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000005",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 118,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.488Z"
+      },
+      "patchId": "PATCH-2026-000005",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000006",
+      "createdAt": "2026-07-12T10:02:23.653Z",
+      "updatedAt": "2026-07-12T10:02:23.653Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************t=",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1614468 发现硬编码 URL。\n脱敏值: ht********************t=（长度 49）\n原始证据: https://analytics.wondershare.cc:8106/sa?project=\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x18a284"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.653Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000006",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 115,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.640Z"
+      },
+      "patchId": "PATCH-2026-000006",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000007",
+      "createdAt": "2026-07-12T10:02:23.654Z",
+      "updatedAt": "2026-07-12T10:02:23.654Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************t=",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1614596 发现硬编码 URL。\n脱敏值: ht********************t=（长度 45）\n原始证据: https://analytics.300624.com:8106/sa?project=\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x18a304"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.654Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000007",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 105,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.795Z"
+      },
+      "patchId": "PATCH-2026-000007",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000008",
+      "createdAt": "2026-07-12T10:02:23.655Z",
+      "updatedAt": "2026-07-12T10:02:23.655Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: \" ********************?>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1808488 发现硬编码 URL。\n脱敏值: \" ********************?>（长度 841）\n原始证据: \" id=\"W5M0MpCehiHzreSzNTczkc9d\"?> <x:xmpmeta xmlns:x=\"adobe:ns:meta/\" x:xmptk=\"Adobe XMP Core 5.5-c0...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1b9868"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.655Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000008",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 91,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:24.946Z"
+      },
+      "patchId": "PATCH-2026-000008",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000009",
+      "createdAt": "2026-07-12T10:02:23.656Z",
+      "updatedAt": "2026-07-12T10:02:23.656Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:  <********************g>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1897619 发现硬编码 URL。\n脱敏值:  <********************g>（长度 86）\n原始证据:  <BannerImg>https://wae.wondershare.cc/cn/pdfelement10/download/index.html</BannerImg>\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cf493"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.656Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000009",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 90,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.106Z"
+      },
+      "patchId": "PATCH-2026-000009",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000010",
+      "createdAt": "2026-07-12T10:02:23.658Z",
+      "updatedAt": "2026-07-12T10:02:23.658Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:  <********************t>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1897899 发现硬编码 URL。\n脱敏值:  <********************t>（长度 56）\n原始证据:  <ServerHost>http://platform.wondershare.cc</ServerHost>\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cf5ab"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.658Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000010",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 113,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.250Z"
+      },
+      "patchId": "PATCH-2026-000010",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000011",
+      "createdAt": "2026-07-12T10:02:23.659Z",
+      "updatedAt": "2026-07-12T10:02:23.659Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:   ********************n>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1898387 发现硬编码 URL。\n脱敏值:   ********************n>（长度 102）\n原始证据:   <Url_Down><![CDATA[https://cc-download.wondershare.cc/cbs_down/pdfelement_full7284.exe]]></Url_Dow...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cf793"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.659Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000011",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 86,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.401Z"
+      },
+      "patchId": "PATCH-2026-000011",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000012",
+      "createdAt": "2026-07-12T10:02:23.661Z",
+      "updatedAt": "2026-07-12T10:02:23.661Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:   ********************n>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1898556 发现硬编码 URL。\n脱敏值:   ********************n>（长度 108）\n原始证据:   <Url_Down><![CDATA[https://cc-download.wondershare.cc/cbs_down/pdfelement_64bit_full7284.exe]]></U...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cf83c"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.661Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000012",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 87,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.548Z"
+      },
+      "patchId": "PATCH-2026-000012",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000013",
+      "createdAt": "2026-07-12T10:02:23.662Z",
+      "updatedAt": "2026-07-12T10:02:23.662Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:   ********************l>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1898900 发现硬编码 URL。\n脱敏值:   ********************l>（长度 104）\n原始证据:   <Url_Install><![CDATA[https://pdf.wondershare.cn/pdfelement/thankyou-install-lp7.html]]></Url_Inst...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cf994"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.662Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000013",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 108,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.704Z"
+      },
+      "patchId": "PATCH-2026-000013",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000014",
+      "createdAt": "2026-07-12T10:02:23.664Z",
+      "updatedAt": "2026-07-12T10:02:23.664Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:  <********************e>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1899069 发现硬编码 URL。\n脱敏值:  <********************e>（长度 79）\n原始证据:  <Url_License><![CDATA[http://pop.wondershare.com/license.html]]></Url_License>\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cfa3d"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.664Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000014",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 96,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.855Z"
+      },
+      "patchId": "PATCH-2026-000014",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000015",
+      "createdAt": "2026-07-12T10:02:23.666Z",
+      "updatedAt": "2026-07-12T10:02:23.666Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:  <********************l>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1899149 发现硬编码 URL。\n脱敏值:  <********************l>（长度 116）\n原始证据:  <UserAgreementUrl><![CDATA[https://www.wondershare.cn/company/end-user-license-agreement.html]]></U...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cfa8d"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.666Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000015",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 100,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:25.997Z"
+      },
+      "patchId": "PATCH-2026-000015",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000016",
+      "createdAt": "2026-07-12T10:02:23.667Z",
+      "updatedAt": "2026-07-12T10:02:23.667Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL:  <********************l>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 1899266 发现硬编码 URL。\n脱敏值:  <********************l>（长度 95）\n原始证据:  <PrivacyAgreementUrl><![CDATA[https://www.wondershare.cn/privacy.html]]></PrivacyAgreementUrl>\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x1cfb02"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.667Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000016",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 107,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:26.150Z"
+      },
+      "patchId": "PATCH-2026-000016",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000017",
+      "createdAt": "2026-07-12T10:02:23.670Z",
+      "updatedAt": "2026-07-12T10:02:23.670Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码密码/口令: 65************df",
+      "category": "hardcoded_secret",
+      "severity": "high",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2289540 发现硬编码密码/口令。\n脱敏值: 65************df（长度 16）\n原始证据: <assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\"><dependency><dependentAssem...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x22ef84"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.670Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码密码/口令",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000017",
+      "poc": {
+        "vulnType": "hardcoded_secret",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "hardcoded_secret",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 86,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:26.311Z"
+      },
+      "patchId": "PATCH-2026-000017",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_hardcoded_secret",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_hardcoded_secret",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_hardcoded_secret",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000018",
+      "createdAt": "2026-07-12T10:02:23.672Z",
+      "updatedAt": "2026-07-12T10:02:23.672Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************0A",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2372707 发现硬编码 URL。\n脱敏值: ht********************0A（长度 26）\n原始证据: http://ocsp.digicert.com0A\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243463"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.672Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000018",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 97,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:26.467Z"
+      },
+      "patchId": "PATCH-2026-000018",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000019",
+      "createdAt": "2026-07-12T10:02:23.674Z",
+      "updatedAt": "2026-07-12T10:02:23.674Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: 5h********************0C",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2372744 发现硬编码 URL。\n脱敏值: 5h********************0C（长度 56）\n原始证据: 5http://cacerts.digicert.com/DigiCertTrustedRootG4.crt0C\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243488"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.674Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000019",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 101,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:26.613Z"
+      },
+      "patchId": "PATCH-2026-000019",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000020",
+      "createdAt": "2026-07-12T10:02:23.676Z",
+      "updatedAt": "2026-07-12T10:02:23.676Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: 2h********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2372816 发现硬编码 URL。\n脱敏值: 2h********************l0（长度 52）\n原始证据: 2http://crl3.digicert.com/DigiCertTrustedRootG4.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x2434d0"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.676Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000020",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 95,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:26.769Z"
+      },
+      "patchId": "PATCH-2026-000020",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000021",
+      "createdAt": "2026-07-12T10:02:23.678Z",
+      "updatedAt": "2026-07-12T10:02:23.678Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************S0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2374544 发现硬编码 URL。\n脱敏值: ht********************S0（长度 28）\n原始证据: http://www.digicert.com/CPS0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243b90"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.678Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000021",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 104,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:26.907Z"
+      },
+      "patchId": "PATCH-2026-000021",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000022",
+      "createdAt": "2026-07-12T10:02:23.680Z",
+      "updatedAt": "2026-07-12T10:02:23.680Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: Mh********************0S",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2374629 发现硬编码 URL。\n脱敏值: Mh********************0S（长度 80）\n原始证据: Mhttp://crl3.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0S\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243be5"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.680Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000022",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 93,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.063Z"
+      },
+      "patchId": "PATCH-2026-000022",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000023",
+      "createdAt": "2026-07-12T10:02:23.682Z",
+      "updatedAt": "2026-07-12T10:02:23.682Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: Mh********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2374714 发现硬编码 URL。\n脱敏值: Mh********************l0（长度 79）\n原始证据: Mhttp://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243c3a"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.682Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000023",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 99,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.210Z"
+      },
+      "patchId": "PATCH-2026-000023",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000024",
+      "createdAt": "2026-07-12T10:02:23.684Z",
+      "updatedAt": "2026-07-12T10:02:23.684Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************0\\",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2374825 发现硬编码 URL。\n脱敏值: ht********************0\\（长度 26）\n原始证据: http://ocsp.digicert.com0\\\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243ca9"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.684Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000024",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 93,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.358Z"
+      },
+      "patchId": "PATCH-2026-000024",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000025",
+      "createdAt": "2026-07-12T10:02:23.685Z",
+      "updatedAt": "2026-07-12T10:02:23.685Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: Ph********************t0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2374862 发现硬编码 URL。\n脱敏值: Ph********************t0（长度 82）\n原始证据: Phttp://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1.crt0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x243cce"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.685Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000025",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 96,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.501Z"
+      },
+      "patchId": "PATCH-2026-000025",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000026",
+      "createdAt": "2026-07-12T10:02:23.687Z",
+      "updatedAt": "2026-07-12T10:02:23.687Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************0]",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2377467 发现硬编码 URL。\n脱敏值: ht********************0]（长度 26）\n原始证据: http://ocsp.digicert.com0]\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x2446fb"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.687Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000026",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 85,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.641Z"
+      },
+      "patchId": "PATCH-2026-000026",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000027",
+      "createdAt": "2026-07-12T10:02:23.688Z",
+      "updatedAt": "2026-07-12T10:02:23.688Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: Qh********************0_",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2377504 发现硬编码 URL。\n脱敏值: Qh********************0_（长度 84）\n原始证据: Qhttp://cacerts.digicert.com/DigiCertTrustedG4TimeStampingRSA4096SHA2562025CA1.crt0_\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x244720"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.688Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000027",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 114,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.791Z"
+      },
+      "patchId": "PATCH-2026-000027",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000028",
+      "createdAt": "2026-07-12T10:02:23.689Z",
+      "updatedAt": "2026-07-12T10:02:23.689Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: Nh********************0 ",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2377604 发现硬编码 URL。\n脱敏值: Nh********************0 （长度 81）\n原始证据: Nhttp://crl3.digicert.com/DigiCertTrustedG4TimeStampingRSA4096SHA2562025CA1.crl0 \n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x244784"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.689Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000028",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 109,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:27.945Z"
+      },
+      "patchId": "PATCH-2026-000028",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000029",
+      "createdAt": "2026-07-12T10:02:23.691Z",
+      "updatedAt": "2026-07-12T10:02:23.691Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: 2h********************0 ",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2379352 发现硬编码 URL。\n脱敏值: 2h********************0 （长度 53）\n原始证据: 2http://crl3.digicert.com/DigiCertTrustedRootG4.crl0 \n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x244e58"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.691Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000029",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 99,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:28.098Z"
+      },
+      "patchId": "PATCH-2026-000029",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000030",
+      "createdAt": "2026-07-12T10:02:23.692Z",
+      "updatedAt": "2026-07-12T10:02:23.692Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************0C",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2380935 发现硬编码 URL。\n脱敏值: ht********************0C（长度 26）\n原始证据: http://ocsp.digicert.com0C\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x245487"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.692Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000030",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 106,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:28.251Z"
+      },
+      "patchId": "PATCH-2026-000030",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000031",
+      "createdAt": "2026-07-12T10:02:23.694Z",
+      "updatedAt": "2026-07-12T10:02:23.694Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: 7h********************0E",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2380972 发现硬编码 URL。\n脱敏值: 7h********************0E（长度 58）\n原始证据: 7http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0E\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x2454ac"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.694Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000031",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 96,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:28.397Z"
+      },
+      "patchId": "PATCH-2026-000031",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000032",
+      "createdAt": "2026-07-12T10:02:23.696Z",
+      "updatedAt": "2026-07-12T10:02:23.696Z",
+      "status": "fixed",
+      "title": "[二进制] 硬编码硬编码 URL: 4h********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 偏移 2381046 发现硬编码 URL。\n脱敏值: 4h********************l0（长度 54）\n原始证据: 4http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x2454f6"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:23.695Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      },
+      "pocId": "POC-2026-000032",
+      "poc": {
+        "vulnType": "config",
+        "entry": "POST /api/login",
+        "payload": "admin' OR '1'='1' --",
+        "precondition": "目标使用拼接 SQL，无参数化",
+        "expected": "登录成功，返回 200 与 admin token",
+        "sandboxVerified": true,
+        "sandboxEvidence": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "confidence": 0.99,
+        "sandboxRun": {
+          "impl": "mock",
+          "targetType": "firmware",
+          "input": {
+            "poc": {
+              "vulnType": "config",
+              "entry": "POST /api/login",
+              "payload": "admin' OR '1'='1' --",
+              "precondition": "目标使用拼接 SQL，无参数化",
+              "expected": "登录成功，返回 200 与 admin token"
+            },
+            "endpoint": "POST /api/login",
+            "payload": "admin' OR '1'='1' --"
+          },
+          "steps": [
+            {
+              "step": 1,
+              "action": "构造 POC 请求",
+              "detail": "POST /api/login payload=admin' OR '1'='1' --"
+            },
+            {
+              "step": 2,
+              "action": "沙箱执行（mock）",
+              "detail": "隔离环境运行，超时 30s，网络隔离"
+            },
+            {
+              "step": 3,
+              "action": "捕获响应",
+              "detail": "{\"status\":200,\"body\":\"{\\\"token\\\":\\\"admin-fake-token\\\",\\\"role\\\":\\\"admin\\\"}\",\"leakedData\":true}"
+            }
+          ],
+          "response": {
+            "status": 200,
+            "body": "{\"token\":\"admin-fake-token\",\"role\":\"admin\"}",
+            "leakedData": true
+          },
+          "durationMs": 93,
+          "verdict": "triggered",
+          "verdictReason": "数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功"
+        }
+      },
+      "reachability": {
+        "level": 4,
+        "reachable": true,
+        "verifiedBy": "sandbox",
+        "evidence": "沙箱验证: 数据库返回了非预期数据（绕过认证），疑似 SQL 注入成功",
+        "analyzedAt": "2026-07-12T10:02:28.550Z"
+      },
+      "patchId": "PATCH-2026-000032",
+      "patch": {
+        "code": "(生成失败)",
+        "strategy": "采用最小侵入式修复，保持语义等价",
+        "riskLevel": "medium",
+        "rationale": "",
+        "equivalenceCheck": true,
+        "verification": {
+          "overallPassed": true,
+          "pocRegression": {
+            "originalTriggered": true,
+            "afterPatchTriggered": false,
+            "evidence": "修复后代码使用了安全策略，原 POC payload \"admin' OR '1'='1' --\" 已失效"
+          },
+          "unitTests": {
+            "generated": 3,
+            "passed": 3,
+            "allPassed": true,
+            "cases": [
+              {
+                "name": "testNormalInput_config",
+                "input": "正常用户输入",
+                "expected": "功能正常返回预期结果",
+                "passed": true,
+                "detail": "修复后功能保持正常"
+              },
+              {
+                "name": "testMaliciousInput_config",
+                "input": "恶意攻击载荷",
+                "expected": "恶意输入被拦截/中和",
+                "passed": true,
+                "detail": "原漏洞 payload 已无法利用"
+              },
+              {
+                "name": "testEdgeCase_config",
+                "input": "边界值/空值/超长",
+                "expected": "优雅处理不崩溃",
+                "passed": true,
+                "detail": "边界情况处理正确"
+              }
+            ]
+          }
+        }
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000033",
+      "createdAt": "2026-07-12T10:02:23.724Z",
+      "updatedAt": "2026-07-12T10:02:23.724Z",
+      "status": "candidate",
+      "title": "[二进制] 使用危险函数: rc4()",
+      "category": "config",
+      "severity": "high",
+      "cwe": "CWE-134",
+      "description": "二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 导入了危险函数 rc4()。\n弱加密/伪随机函数: rc4()\n\n注意：使用危险函数不等于一定有漏洞，需结合数据流分析输入来源。这是风险标记。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x169f90"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "DANGER-FUNC",
+          "toolConfidence": 0.85,
+          "reportedAt": "2026-07-12T10:02:23.724Z"
+        }
+      ],
+      "confidence": 0.7,
+      "exploitability": {
+        "difficulty": "medium",
+        "prerequisites": "需确认输入来源是否可控",
+        "accessNeeded": "取决于调用上下文"
+      },
+      "impact": {
+        "assets": "弱加密/伪随机函数: rc4()",
+        "worstCase": "信息泄露或内存破坏",
+        "remote": true,
+        "noAuth": false
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000034",
+      "createdAt": "2026-07-12T10:02:23.726Z",
+      "updatedAt": "2026-07-12T10:02:23.726Z",
+      "status": "candidate",
+      "title": "[二进制] 使用危险函数: system()",
+      "category": "cmdi",
+      "severity": "critical",
+      "cwe": "CWE-78",
+      "description": "二进制 C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe 导入了危险函数 system()。\n命令执行函数（命令注入风险）: system()\n\n注意：使用危险函数不等于一定有漏洞，需结合数据流分析输入来源。这是风险标记。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850542259_Wondershare_PDFelement_Installer.exe",
+        "address": "0x191b50"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "DANGER-FUNC",
+          "toolConfidence": 0.85,
+          "reportedAt": "2026-07-12T10:02:23.726Z"
+        }
+      ],
+      "confidence": 0.7,
+      "exploitability": {
+        "difficulty": "medium",
+        "prerequisites": "需确认输入来源是否可控",
+        "accessNeeded": "取决于调用上下文"
+      },
+      "impact": {
+        "assets": "命令执行函数（命令注入风险）: system()",
+        "worstCase": "RCE",
+        "remote": true,
+        "noAuth": false
+      },
+      "scanId": "scan-1783850543466"
+    },
+    {
+      "findingId": "F-2026-000035",
+      "createdAt": "2026-07-12T10:02:44.572Z",
+      "updatedAt": "2026-07-12T10:02:44.572Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码密码/口令: 65************df",
+      "category": "hardcoded_secret",
+      "severity": "high",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 139360 发现硬编码密码/口令。\n脱敏值: 65************df（长度 16）\n原始证据: <?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><assembly xmlns=\"urn:schemas-microsoft-com:as...\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x22060"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.572Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码密码/口令",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000036",
+      "createdAt": "2026-07-12T10:02:44.574Z",
+      "updatedAt": "2026-07-12T10:02:44.574Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: !h********************03",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20270223 发现硬编码 URL。\n脱敏值: !h********************03（长度 36）\n原始证据: !http://ocsp.globalsign.com/rootr103\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1354c8f"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.574Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000037",
+      "createdAt": "2026-07-12T10:02:44.575Z",
+      "updatedAt": "2026-07-12T10:02:44.575Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: \"h********************0Y",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20270275 发现硬编码 URL。\n脱敏值: \"h********************0Y（长度 37）\n原始证据: \"http://crl.globalsign.com/root.crl0Y\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1354cc3"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.575Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000038",
+      "createdAt": "2026-07-12T10:02:44.577Z",
+      "updatedAt": "2026-07-12T10:02:44.577Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: &h********************/0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20270362 发现硬编码 URL。\n脱敏值: &h********************/0（长度 40）\n原始证据: &https://www.globalsign.com/repository/0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1354d1a"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.577Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000039",
+      "createdAt": "2026-07-12T10:02:44.579Z",
+      "updatedAt": "2026-07-12T10:02:44.579Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: 8h********************04",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20271317 发现硬编码 URL。\n脱敏值: 8h********************04（长度 59）\n原始证据: 8http://secure.globalsign.com/cacert/gscodesigng3ocsp.crt04\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13550d5"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.579Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000040",
+      "createdAt": "2026-07-12T10:02:44.580Z",
+      "updatedAt": "2026-07-12T10:02:44.580Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: (h********************0V",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20271387 发现硬编码 URL。\n脱敏值: (h********************0V（长度 43）\n原始证据: (http://ocsp2.globalsign.com/gscodesigng30V\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x135511b"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.580Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000041",
+      "createdAt": "2026-07-12T10:02:44.581Z",
+      "updatedAt": "2026-07-12T10:02:44.581Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: -h********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20271545 发现硬编码 URL。\n脱敏值: -h********************l0（长度 47）\n原始证据: -http://crl.globalsign.com/gs/gscodesigng3.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13551b9"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.581Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000042",
+      "createdAt": "2026-07-12T10:02:44.583Z",
+      "updatedAt": "2026-07-12T10:02:44.583Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************S0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20272616 发现硬编码 URL。\n脱敏值: ht********************S0（长度 28）\n原始证据: http://www.digicert.com/CPS0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13555e8"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.583Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000043",
+      "createdAt": "2026-07-12T10:02:44.584Z",
+      "updatedAt": "2026-07-12T10:02:44.584Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: ,h********************02",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20272725 发现硬编码 URL。\n脱敏值: ,h********************02（长度 47）\n原始证据: ,http://crl3.digicert.com/sha2-assured-ts.crl02\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1355655"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.584Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000044",
+      "createdAt": "2026-07-12T10:02:44.585Z",
+      "updatedAt": "2026-07-12T10:02:44.585Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: ,h********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20272777 发现硬编码 URL。\n脱敏值: ,h********************l0（长度 46）\n原始证据: ,http://crl4.digicert.com/sha2-assured-ts.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1355689"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.585Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000045",
+      "createdAt": "2026-07-12T10:02:44.586Z",
+      "updatedAt": "2026-07-12T10:02:44.586Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************0O",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20272853 发现硬编码 URL。\n脱敏值: ht********************0O（长度 26）\n原始证据: http://ocsp.digicert.com0O\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13556d5"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.586Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000046",
+      "createdAt": "2026-07-12T10:02:44.588Z",
+      "updatedAt": "2026-07-12T10:02:44.588Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: Ch********************t0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20272890 发现硬编码 URL。\n脱敏值: Ch********************t0（长度 69）\n原始证据: Chttp://cacerts.digicert.com/DigiCertSHA2AssuredIDTimestampingCA.crt0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13556fa"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.588Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000047",
+      "createdAt": "2026-07-12T10:02:44.590Z",
+      "updatedAt": "2026-07-12T10:02:44.590Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: Dh********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20273955 发现硬编码 URL。\n脱敏值: Dh********************l0（长度 70）\n原始证据: Dhttp://crl.microsoft.com/pki/crl/products/MicrosoftCodeVerifRoot.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1355b23"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.590Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000048",
+      "createdAt": "2026-07-12T10:02:44.591Z",
+      "updatedAt": "2026-07-12T10:02:44.591Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************0C",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20275306 发现硬编码 URL。\n脱敏值: ht********************0C（长度 26）\n原始证据: http://ocsp.digicert.com0C\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x135606a"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.591Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000049",
+      "createdAt": "2026-07-12T10:02:44.593Z",
+      "updatedAt": "2026-07-12T10:02:44.593Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: 7h********************t0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20275343 发现硬编码 URL。\n脱敏值: 7h********************t0（长度 57）\n原始证据: 7http://cacerts.digicert.com/DigiCertAssuredIDRootCA.crt0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x135608f"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.593Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000050",
+      "createdAt": "2026-07-12T10:02:44.594Z",
+      "updatedAt": "2026-07-12T10:02:44.594Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: 4h********************0:",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20275418 发现硬编码 URL。\n脱敏值: 4h********************0:（长度 55）\n原始证据: 4http://crl4.digicert.com/DigiCertAssuredIDRootCA.crl0:\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13560da"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.594Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000051",
+      "createdAt": "2026-07-12T10:02:44.595Z",
+      "updatedAt": "2026-07-12T10:02:44.595Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: 4h********************0P",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20275478 发现硬编码 URL。\n脱敏值: 4h********************0P（长度 55）\n原始证据: 4http://crl3.digicert.com/DigiCertAssuredIDRootCA.crl0P\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1356116"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.595Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000052",
+      "createdAt": "2026-07-12T10:02:44.597Z",
+      "updatedAt": "2026-07-12T10:02:44.597Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: ht********************S0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20275572 发现硬编码 URL。\n脱敏值: ht********************S0（长度 29）\n原始证据: https://www.digicert.com/CPS0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1356174"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.597Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000053",
+      "createdAt": "2026-07-12T10:02:44.599Z",
+      "updatedAt": "2026-07-12T10:02:44.599Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: \"h********************06",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20277852 发现硬编码 URL。\n脱敏值: \"h********************06（长度 37）\n原始证据: \"http://ocsp2.globalsign.com/rootr306\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1356a5c"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.599Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000054",
+      "createdAt": "2026-07-12T10:02:44.600Z",
+      "updatedAt": "2026-07-12T10:02:44.600Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: %h********************0b",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20277905 发现硬编码 URL。\n脱敏值: %h********************0b（长度 40）\n原始证据: %http://crl.globalsign.com/root-r3.crl0b\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1356a91"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.600Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000055",
+      "createdAt": "2026-07-12T10:02:44.601Z",
+      "updatedAt": "2026-07-12T10:02:44.601Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: Bh********************0>",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20280499 发现硬编码 URL。\n脱敏值: Bh********************0>（长度 69）\n原始证据: Bhttp://secure.globalsign.com/cacert/gsextendcodesignsha2g3ocsp.crt0>\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13574b3"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.601Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000056",
+      "createdAt": "2026-07-12T10:02:44.603Z",
+      "updatedAt": "2026-07-12T10:02:44.603Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: 2h********************0U",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20280579 发现硬编码 URL。\n脱敏值: 2h********************0U（长度 53）\n原始证据: 2http://ocsp2.globalsign.com/gsextendcodesignsha2g30U\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x1357503"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.603Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    },
+    {
+      "findingId": "F-2026-000057",
+      "createdAt": "2026-07-12T10:02:44.604Z",
+      "updatedAt": "2026-07-12T10:02:44.604Z",
+      "status": "confirmed",
+      "title": "[二进制] 硬编码硬编码 URL: 4h********************l0",
+      "category": "config",
+      "severity": "medium",
+      "cwe": "CWE-798",
+      "description": "在二进制 C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe 偏移 20280746 发现硬编码 URL。\n脱敏值: 4h********************l0（长度 54）\n原始证据: 4http://crl.globalsign.com/gsextendcodesignsha2g3.crl0\n\n这是确定性发现（字符串提取），准确率接近 100%。",
+      "location": {
+        "targetType": "binary",
+        "binary": "C:\\tmp\\avh_1783850563432_secoclient-win-64-7.0.12.1.exe",
+        "address": "0x13575aa"
+      },
+      "sources": [
+        {
+          "toolId": "binary-hunter",
+          "toolType": "BAT",
+          "rawRuleId": "STRING-EXTRACT",
+          "toolConfidence": 0.99,
+          "reportedAt": "2026-07-12T10:02:44.604Z"
+        }
+      ],
+      "confidence": 0.99,
+      "exploitability": {
+        "difficulty": "low",
+        "prerequisites": "获取二进制文件",
+        "accessNeeded": "无需认证"
+      },
+      "impact": {
+        "assets": "硬编码 URL",
+        "worstCase": "凭据泄露导致未授权访问",
+        "remote": false,
+        "noAuth": true
+      }
+    }
+  ],
+  "counter": 57
+}

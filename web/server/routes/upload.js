@@ -50,7 +50,8 @@ const upload = multer({
   }),
   limits: { fileSize: 100 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const exts = [".zip", ".bin", ".elf", ".exe", ".so", ".dll", ".o", ".jar", ".class", ".img", ".fw", ".tar", ".gz"];
+    const exts = [".zip", ".bin", ".elf", ".exe", ".so", ".dll", ".o", ".jar", ".class", ".img", ".fw", ".tar", ".gz",
+      ".md", ".java", ".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".c", ".h", ".cpp", ".cc", ".hpp", ".php", ".rb", ".rs", ".kt", ".swift", ".scala", ".lua", ".sh", ".json", ".yaml", ".yml", ".xml", ".txt", ".toml"];
     const ext = path.extname(file.originalname).toLowerCase();
     if (exts.includes(ext)) cb(null, true);
     else cb(new Error(`不支持的文件类型: ${ext}（支持 zip/tar/bin/elf/exe/jar/class）`));
@@ -129,6 +130,19 @@ function uploadRoutes() {
         return res.json({
           path: dest,
           type: "jar",
+          filename: originalName,
+          size: req.file.size,
+        });
+      }
+
+      // 源码/Skill 文件（.md/.java/.py/.js 等）→ 作为源码处理
+      const sourceExts = [".md", ".java", ".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".c", ".h", ".cpp", ".cc", ".hpp", ".php", ".rb", ".rs", ".kt", ".swift", ".scala", ".lua", ".sh", ".json", ".yaml", ".yml", ".xml", ".txt", ".toml"];
+      if (sourceExts.includes(ext)) {
+        const dest = path.join(TMP_DIR, `avh_${Date.now()}_${originalName}`);
+        fs.renameSync(tmpPath, dest);
+        return res.json({
+          path: dest,
+          type: "source_file",
           filename: originalName,
           size: req.file.size,
         });
