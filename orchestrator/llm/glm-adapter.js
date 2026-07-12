@@ -15,9 +15,45 @@ const config = require("../config");
 class GlmAdapter extends ILlm {
   constructor() {
     super();
-    this.baseUrl = config.llm.glm.baseUrl;
+    let baseUrl = config.llm.glm.baseUrl || "https://open.bigmodel.cn/api/paas/v4";
+    if (baseUrl.includes("/anthropic") || baseUrl.includes("/chat/completions")) {
+      baseUrl = "https://open.bigmodel.cn/api/paas/v4";
+      console.warn("[GLM] 检测到非标准路径，已自动修正为 paas/v4");
+    }
+    if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
+    this.baseUrl = baseUrl;
     this.apiKey = config.llm.glm.apiKey;
     this.models = config.llm.glm.models;
+    this._lastCallTime = 0;
+  }
+
+  /**
+   * 限流：每次调用间隔至少 1.5 秒（避免 429）
+   */
+  async _rateLimit() {
+    const now = Date.now();
+    const elapsed = now - this._lastCallTime;
+    const minInterval = 1500; // 1.5 秒/次 ≈ 40 RPM
+    if (elapsed < minInterval) {
+      await new Promise(r => setTimeout(r, minInterval - elapsed));
+    }
+    this._lastCallTime = Date.now();
+  }
+
+  async _retryWithBackoff(fn, maxRetries = 2) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (e) {
+        if (e.message?.includes("429") && attempt < maxRetries) {
+          const waitMs = 5000 * (attempt + 1); // 5s, 10s 退避
+          console.warn(`[GLM] 429 限流，${waitMs/1000}s 后重试 (${attempt+1}/${maxRetries})`);
+          await new Promise(r => setTimeout(r, waitMs));
+          continue;
+        }
+        throw e;
+      }
+    }
   }
 
   implName() {
@@ -33,7 +69,10 @@ class GlmAdapter extends ILlm {
   }
 
   async complete(prompt, opts = {}) {
-    const model = this.pickModel(opts.difficulty);
+    return this._retryWithBackoff(async () => {
+      await this._rateLimit();
+
+      const model = this.pickModel(opts.difficulty);
     const messages = [];
     if (opts.systemPrompt) {
       messages.push({ role: "system", content: opts.systemPrompt });
@@ -70,12 +109,17 @@ class GlmAdapter extends ILlm {
 
       if (!resp.ok) {
         const errText = await resp.text();
+        console.error(`[GLM] API 错误 ${resp.status}: ${errText.slice(0, 300)}`);
         throw new Error(`GLM API ${resp.status}: ${errText.slice(0, 200)}`);
       }
 
       const data = await resp.json();
       const text =
         data.choices?.[0]?.message?.content || "";
+
+      if (!text) {
+        console.error(`[GLM] 空响应:`, JSON.stringify(data).slice(0, 300));
+      }
 
       let structured = null;
       if (opts.jsonMode !== false && text) {

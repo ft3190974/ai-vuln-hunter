@@ -10,9 +10,24 @@
       "temperature": 0.2,
       "maxTokens": 2048,
       "difficulty": "auto",
-      "enabled": true,
+      "enabled": false,
       "isDefault": true,
-      "createdAt": "2026-07-12T17:54:44.514Z"
+      "createdAt": "2026-07-12T17:54:44.514Z",
+      "updatedAt": "2026-07-12T18:04:21.195Z"
+    },
+    {
+      "id": "llm-2",
+      "name": "glm",
+      "provider": "glm",
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+      "apiKey": "ae6c4a3bea474ceb9ffabaeac53169b7.STsLkBOqDvhtS0vy",
+      "model": "glm-4.6",
+      "temperature": 2.3,
+      "maxTokens": 204800,
+      "difficulty": "high",
+      "enabled": true,
+      "createdAt": "2026-07-12T18:04:17.150Z",
+      "updatedAt": "2026-07-12T18:10:51.930Z"
     }
   ],
   "toolConfigs": [

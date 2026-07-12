@@ -7271,5 +7271,1621 @@
     },
     "error": null,
     "completedAt": "2026-07-12T17:54:53.430Z"
+  },
+  "scan-1783879112437": {
+    "scanId": "scan-1783879112437",
+    "status": "completed",
+    "startedAt": "2026-07-12T17:58:32.460Z",
+    "report": {
+      "scanId": "scan-1783879112437",
+      "startedAt": "2026-07-12T17:58:32.460Z",
+      "completedAt": "2026-07-12T17:59:05.466Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": {
+        "projectType": "C/C++ 系统",
+        "framework": "Flask",
+        "modules": [
+          "漏洞演示",
+          "用户认证",
+          "订单管理",
+          "支付",
+          "优惠券"
+        ],
+        "entryPoints": [],
+        "businessFlows": {
+          "订单流程": "创建订单 → 待支付 → 已支付 → 已发货 → 已完成",
+          "支付流程": "发起支付 → 调第三方 → 回调更新状态"
+        },
+        "stateMachine": {
+          "order": [
+            "PENDING",
+            "PAID",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "permissionModel": {},
+        "keyDataFlows": [
+          "HTTP 请求 → 控制器 → 服务层 → 数据库"
+        ],
+        "riskAreas": [
+          "SQL注入",
+          "XSS",
+          "SSRF",
+          "CSRF",
+          "命令注入",
+          "文件上传",
+          "SSTI",
+          "路径穿越",
+          "反序列化",
+          "状态迁移",
+          "金额处理",
+          "支付回调",
+          "幂等性",
+          "优惠券叠加",
+          "权限校验",
+          "会话管理",
+          "SQL 注入",
+          "内存安全",
+          "缓冲区溢出",
+          "资源泄漏"
+        ],
+        "businessRules": [
+          "靶场环境故意包含漏洞",
+          "不应用于生产环境",
+          "订单金额必须 > 0",
+          "已取消订单不可发货",
+          "支付必须幂等",
+          "回调必须验签",
+          "优惠券不可叠加使用",
+          "资源访问必须校验属主",
+          "malloc 必须配对 free",
+          "禁止使用 strcpy"
+        ],
+        "_understoodFiles": [
+          "app.py",
+          "unauthorized.py",
+          "unauthorized.html",
+          "horizontal.py",
+          "vertical.py"
+        ],
+        "_understoodAt": "2026-07-12T17:58:32.580Z"
+      },
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.461Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.461Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.464Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 15 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.520Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "项目理解完成: C/C++ 系统 | 5 模块 | 20 高风险区域 | 10 业务规则",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.580Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.581Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "源代码切片完成，共 150 个函数/方法",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.731Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "规则加载：120 条自定义 + 7 条内置",
+          "level": "info",
+          "at": "2026-07-12T17:58:32.731Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-server\\app.py:set_response_content_type (行 68-76)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:32.736Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:obscureData (行 2-8)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:33.290Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:fetchData (行 6-11)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:34.112Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:if (行 9-19)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:34.781Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:processResponse (行 17-23)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:35.584Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:shuffleString (行 21-25)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:36.299Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:for (行 23-32)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:36.879Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:periodicCheck (行 30-38)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:37.371Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:init (行 36-45)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:38.058Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\serialize\\assist\\l1-pickle.py:(top-level) (行 1-9)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:38.606Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l1-sqli.py:(top-level) (行 1-29)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:39.378Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l2-sqli.py:(top-level) (行 1-29)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:40.386Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l3-sqli.py:(top-level) (行 1-29)，匹配 19 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:41.322Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_interopDefaultLegacy (行 9-15)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:42.424Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_defineProperties (行 13-16)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:42.983Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 14-25)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:43.445Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_createClass (行 23-33)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:44.183Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 31-36)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:44.849Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 34-49)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:45.280Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_inheritsLoose (行 47-56)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:45.774Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_setPrototypeOf (行 54-79)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:46.353Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:toType (行 77-80)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:46.923Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 78-87)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:47.310Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:getSpecialTransitionEndEvent (行 85-101)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:48.021Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:transitionEndEmulator (行 99-108)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:49.008Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:setTimeout (行 106-109)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:49.433Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 107-116)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:49.922Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:setTransitionEndSupport (行 114-138)，匹配 15 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:50.417Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 136-150)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:51.284Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 148-160)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:52.129Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 158-182)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:52.729Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 180-195)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:53.546Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 193-200)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:54.240Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 198-205)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:54.772Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 203-210)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:55.311Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 208-217)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:55.744Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 215-228)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:56.391Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 226-258)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:57.100Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:Alert (行 256-269)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:57.850Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 267-292)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:58.277Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 290-296)，匹配 5 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:59.218Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 294-336)，匹配 18 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:58:59.519Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 334-341)，匹配 6 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:00.604Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 339-349)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:00.959Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 347-412)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:01.552Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:Button (行 410-426)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:02.540Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 424-429)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:03.312Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 427-430)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:03.977Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 428-436)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:04.379Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879104783\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 434-442)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:04.986Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘完成：分析 50/150 片段，LLM 调用 553 次，发现 0 个漏洞（含业务逻辑）",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.457Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.457Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.457Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.458Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.466Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T17:59:05.467Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T17:59:05.467Z"
+  },
+  "scan-1783879193122": {
+    "scanId": "scan-1783879193122",
+    "status": "completed",
+    "startedAt": "2026-07-12T17:59:53.135Z",
+    "report": {
+      "scanId": "scan-1783879193122",
+      "startedAt": "2026-07-12T17:59:53.135Z",
+      "completedAt": "2026-07-12T18:00:26.132Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": {
+        "projectType": "C/C++ 系统",
+        "framework": "Flask",
+        "modules": [
+          "漏洞演示",
+          "用户认证",
+          "订单管理",
+          "支付",
+          "优惠券"
+        ],
+        "entryPoints": [],
+        "businessFlows": {
+          "订单流程": "创建订单 → 待支付 → 已支付 → 已发货 → 已完成",
+          "支付流程": "发起支付 → 调第三方 → 回调更新状态"
+        },
+        "stateMachine": {
+          "order": [
+            "PENDING",
+            "PAID",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "permissionModel": {},
+        "keyDataFlows": [
+          "HTTP 请求 → 控制器 → 服务层 → 数据库"
+        ],
+        "riskAreas": [
+          "SQL注入",
+          "XSS",
+          "SSRF",
+          "CSRF",
+          "命令注入",
+          "文件上传",
+          "SSTI",
+          "路径穿越",
+          "反序列化",
+          "状态迁移",
+          "金额处理",
+          "支付回调",
+          "幂等性",
+          "优惠券叠加",
+          "权限校验",
+          "会话管理",
+          "SQL 注入",
+          "内存安全",
+          "缓冲区溢出",
+          "资源泄漏"
+        ],
+        "businessRules": [
+          "靶场环境故意包含漏洞",
+          "不应用于生产环境",
+          "订单金额必须 > 0",
+          "已取消订单不可发货",
+          "支付必须幂等",
+          "回调必须验签",
+          "优惠券不可叠加使用",
+          "资源访问必须校验属主",
+          "malloc 必须配对 free",
+          "禁止使用 strcpy"
+        ],
+        "_understoodFiles": [
+          "app.py",
+          "unauthorized.py",
+          "unauthorized.html",
+          "horizontal.py",
+          "vertical.py"
+        ],
+        "_understoodAt": "2026-07-12T17:59:53.243Z"
+      },
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.136Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.136Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.137Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 15 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.191Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "项目理解完成: C/C++ 系统 | 5 模块 | 20 高风险区域 | 10 业务规则",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.243Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.244Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "源代码切片完成，共 150 个函数/方法",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.379Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "规则加载：120 条自定义 + 7 条内置",
+          "level": "info",
+          "at": "2026-07-12T17:59:53.379Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-server\\app.py:set_response_content_type (行 68-76)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:53.385Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:obscureData (行 2-8)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:53.910Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:fetchData (行 6-11)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:54.734Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:if (行 9-19)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:55.411Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:processResponse (行 17-23)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:56.170Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:shuffleString (行 21-25)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:56.905Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:for (行 23-32)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:57.481Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:periodicCheck (行 30-38)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:57.955Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:init (行 36-45)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:58.670Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\serialize\\assist\\l1-pickle.py:(top-level) (行 1-9)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:59.192Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l1-sqli.py:(top-level) (行 1-29)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:59:59.957Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l2-sqli.py:(top-level) (行 1-29)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:00.971Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l3-sqli.py:(top-level) (行 1-29)，匹配 19 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:01.890Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_interopDefaultLegacy (行 9-15)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:02.991Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_defineProperties (行 13-16)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:03.587Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 14-25)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:04.071Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_createClass (行 23-33)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:04.836Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 31-36)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:05.501Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 34-49)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:05.924Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_inheritsLoose (行 47-56)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:06.400Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_setPrototypeOf (行 54-79)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:06.978Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:toType (行 77-80)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:07.575Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 78-87)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:07.983Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:getSpecialTransitionEndEvent (行 85-101)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:08.687Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:transitionEndEmulator (行 99-108)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:09.648Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:setTimeout (行 106-109)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:10.069Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 107-116)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:10.556Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:setTransitionEndSupport (行 114-138)，匹配 15 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:11.031Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 136-150)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:11.885Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 148-160)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:12.747Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 158-182)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:13.343Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 180-195)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:14.181Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 193-200)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:14.881Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 198-205)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:15.392Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 203-210)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:15.936Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 208-217)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:16.345Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 215-228)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:17.022Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 226-258)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:17.720Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:Alert (行 256-269)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:18.475Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 267-292)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:18.895Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 290-296)，匹配 5 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:19.820Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 294-336)，匹配 18 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:20.137Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 334-341)，匹配 6 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:21.193Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 339-349)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:21.551Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 347-412)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:22.131Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:Button (行 410-426)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:23.160Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 424-429)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:23.939Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 427-430)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:24.590Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 428-436)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:25.010Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879189592\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 434-442)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:00:25.654Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘完成：分析 50/150 片段，LLM 调用 553 次，发现 0 个漏洞（含业务逻辑）",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.123Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.123Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.123Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.123Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.123Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.124Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.124Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.124Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.124Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.124Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.124Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T18:00:26.132Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T18:00:26.132Z"
+  },
+  "scan-1783879471101": {
+    "scanId": "scan-1783879471101",
+    "status": "completed",
+    "startedAt": "2026-07-12T18:04:31.116Z",
+    "report": {
+      "scanId": "scan-1783879471101",
+      "startedAt": "2026-07-12T18:04:31.116Z",
+      "completedAt": "2026-07-12T18:05:22.244Z",
+      "current": "REPORT",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": {
+        "_understoodFiles": [
+          "app.py",
+          "unauthorized.py",
+          "unauthorized.html",
+          "horizontal.py",
+          "vertical.py"
+        ],
+        "_understoodAt": "2026-07-12T18:04:31.310Z"
+      },
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.116Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.116Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.118Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 15 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.165Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "项目理解完成: 未知 | 0 模块 | 0 高风险区域 | 0 业务规则",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.310Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.310Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "源代码切片完成，共 150 个函数/方法",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.433Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "规则加载：120 条自定义 + 7 条内置",
+          "level": "info",
+          "at": "2026-07-12T18:04:31.433Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-server\\app.py:set_response_content_type (行 68-76)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:31.434Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:obscureData (行 2-8)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:32.036Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:fetchData (行 6-11)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:32.876Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:if (行 9-19)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:33.521Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:processResponse (行 17-23)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:34.302Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:shuffleString (行 21-25)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:35.025Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:for (行 23-32)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:35.610Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:periodicCheck (行 30-38)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:36.074Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:init (行 36-45)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:36.780Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\serialize\\assist\\l1-pickle.py:(top-level) (行 1-9)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:37.306Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l1-sqli.py:(top-level) (行 1-29)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:38.080Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l2-sqli.py:(top-level) (行 1-29)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:39.097Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l3-sqli.py:(top-level) (行 1-29)，匹配 19 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:40.036Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_interopDefaultLegacy (行 9-15)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:41.156Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_defineProperties (行 13-16)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:41.750Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 14-25)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:42.229Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_createClass (行 23-33)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:43.101Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 31-36)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:44.248Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 34-49)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:45.347Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_inheritsLoose (行 47-56)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:46.417Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_setPrototypeOf (行 54-79)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:47.293Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:toType (行 77-80)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:48.293Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 78-87)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:49.214Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:getSpecialTransitionEndEvent (行 85-101)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:50.700Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:transitionEndEmulator (行 99-108)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:52.526Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:setTimeout (行 106-109)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:53.480Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 107-116)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:54.587Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:setTransitionEndSupport (行 114-138)，匹配 15 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:55.460Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 136-150)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:56.736Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 148-160)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:58.289Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 158-182)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:04:59.205Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 180-195)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:00.651Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 193-200)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:02.148Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 198-205)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:03.160Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 203-210)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:04.398Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 208-217)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:05.393Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 215-228)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:06.460Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 226-258)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:07.536Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:Alert (行 256-269)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:08.978Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 267-292)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:09.610Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 290-296)，匹配 5 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:11.078Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 294-336)，匹配 18 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:11.778Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 334-341)，匹配 6 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:13.593Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 339-349)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:14.277Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 347-412)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:15.331Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:Button (行 410-426)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:17.142Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 424-429)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:18.490Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 427-430)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:19.490Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 428-436)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:20.101Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783879466495\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:if (行 434-442)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T18:05:21.384Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘完成：分析 50/150 片段，LLM 调用 553 次，发现 0 个漏洞（含业务逻辑）",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.235Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.236Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T18:05:22.244Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T18:05:22.244Z"
   }
 }
