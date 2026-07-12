@@ -18,6 +18,8 @@ export default function StatusPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [sourcePage, setSourcePage] = useState(0);
+  const PAGE_SIZE = 8;
 
   const load = async () => {
     setLoading(true);
@@ -64,24 +66,45 @@ export default function StatusPage() {
             {syncing ? "同步中..." : "立即同步"}
           </button>
         </div>
-        <table>
-          <thead>
-            <tr><th>数据源</th><th>启用</th><th>入库数</th><th>最后同步</th><th>错误</th></tr>
-          </thead>
-          <tbody>
-            {vulnDb.sources.map((s) => (
-              <tr key={s.source}>
-                <td><code>{s.source}</code></td>
-                <td>{s.enabled ? "✓" : "✗"}</td>
-                <td>{s.lastSyncCount}</td>
-                <td style={{ fontSize: 12 }}>{s.lastSyncAt || "—"}</td>
-                <td style={{ color: s.lastError ? "#fca5a5" : "var(--text-muted)", fontSize: 12 }}>
-                  {s.lastError || "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* 分页 */}
+        {(() => {
+          const allSources = vulnDb.sources || [];
+          const totalPages = Math.ceil(allSources.length / PAGE_SIZE);
+          const pageSources = allSources.slice(sourcePage * PAGE_SIZE, (sourcePage + 1) * PAGE_SIZE);
+          return (
+            <>
+              <table>
+                <thead>
+                  <tr><th>数据源</th><th>启用</th><th>入库数</th><th>最后同步</th><th>错误</th></tr>
+                </thead>
+                <tbody>
+                  {pageSources.map((s) => (
+                    <tr key={s.source}>
+                      <td><code>{s.source}</code></td>
+                      <td>{s.enabled ? "✓" : "✗"}</td>
+                      <td>{s.lastSyncCount}</td>
+                      <td style={{ fontSize: 12 }}>{s.lastSyncAt || "—"}</td>
+                      <td style={{ color: s.lastError ? "#fca5a5" : "var(--text-muted)", fontSize: 12 }}>
+                        {s.lastError || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {totalPages > 1 && (
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 12 }}>
+                  <button className="secondary" disabled={sourcePage === 0}
+                    onClick={() => setSourcePage(sourcePage - 1)}>上一页</button>
+                  <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
+                    第 {sourcePage + 1} / {totalPages} 页（共 {allSources.length} 个源）
+                  </span>
+                  <button className="secondary" disabled={sourcePage >= totalPages - 1}
+                    onClick={() => setSourcePage(sourcePage + 1)}>下一页</button>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     </div>
   );
