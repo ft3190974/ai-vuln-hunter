@@ -147,6 +147,7 @@ class GlmAdapter extends ILlm {
     } finally {
       clearTimeout(timer);
     }
+    }); // end _retryWithBackoff
   }
 }
 
