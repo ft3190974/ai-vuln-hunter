@@ -163,35 +163,50 @@ function sliceSource(input) {
 }
 
 function walkDir(dir, maxFiles) {
-  const slices = [];
+  // ★ 优先级排序：后端路由/控制器先分析，前端 JS 后分析
   const sourceExts = new Set([
     ".java", ".py", ".js", ".jsx", ".ts", ".tsx", ".go",
     ".c", ".h", ".cpp", ".cc", ".hpp", ".php", ".rb",
   ]);
+  const HIGH_PRIORITY_RE = /(app|main|server|views|routes|config|settings|__init__)\.(py|js|ts|java)$/i;
+  const HIGH_PRIORITY_DIR = /controller|route|router|api|handler|middleware|service|model|view/i;
+  const LOW_PRIORITY_DIR = /^(static|public|assets|templates|dist|build|frontend|client|node_modules)$/i;
+
+  const highPriority = [], normalPriority = [], lowPriority = [];
   let fileCount = 0;
 
-  const walk = (d) => {
-    if (fileCount >= maxFiles) return;
+  const walk = (d, inLowDir) => {
+    if (fileCount >= maxFiles * 3) return;
     let entries;
     try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
     for (const entry of entries) {
-      if (fileCount >= maxFiles) return;
-      // 跳过 node_modules / .git / dist / build 等
+      if (fileCount >= maxFiles * 3) return;
       if (["node_modules", ".git", "dist", "build", "target", "vendor", "__pycache__"].includes(entry.name)) continue;
       const full = path.join(d, entry.name);
       if (entry.isDirectory()) {
-        walk(full);
+        const childLow = inLowDir || LOW_PRIORITY_DIR.test(entry.name);
+        walk(full, childLow);
       } else if (sourceExts.has(path.extname(entry.name).toLowerCase())) {
         try {
           const content = fs.readFileSync(full, "utf-8");
-          slices.push(...sliceFile(full, content));
+          const fslices = sliceFile(full, content);
           fileCount++;
-        } catch { /* 忽略读失败 */ }
+          const dirName = path.basename(path.dirname(full));
+          if (HIGH_PRIORITY_RE.test(entry.name) || HIGH_PRIORITY_DIR.test(dirName) || HIGH_PRIORITY_DIR.test(full)) {
+            highPriority.push(...fslices);
+          } else if (inLowDir || /^(static|public|assets|templates|dist|build|frontend|client)$/i.test(dirName)) {
+            lowPriority.push(...fslices);
+          } else {
+            normalPriority.push(...fslices);
+          }
+        } catch {}
       }
     }
   };
-  walk(dir);
-  return slices;
+  walk(dir, false);
+  // 合并：高优先级 > 普通 > 前端
+  return [...highPriority, ...normalPriority, ...lowPriority].slice(0, maxFiles * 3);
+}
 }
 
 module.exports = { sliceSource, sliceFile, detectLanguage };

@@ -6630,283 +6630,372 @@
     "error": null,
     "completedAt": "2026-07-12T10:33:11.432Z"
   },
-  "scan-1783871895122": {
-    "scanId": "scan-1783871895122",
+  "scan-1783878508281": {
+    "scanId": "scan-1783878508281",
     "status": "completed",
-    "startedAt": "2026-07-12T15:58:15.128Z",
+    "startedAt": "2026-07-12T17:48:28.289Z",
     "report": {
-      "scanId": "scan-1783871895122",
-      "startedAt": "2026-07-12T15:58:15.128Z",
-      "completedAt": "2026-07-12T15:58:15.723Z",
-      "current": "FAILED",
+      "scanId": "scan-1783878508281",
+      "startedAt": "2026-07-12T17:48:28.289Z",
+      "completedAt": "2026-07-12T17:48:42.352Z",
+      "current": "REPORT",
       "findings": [],
       "pocs": [],
       "patches": [],
       "attackScenario": null,
-      "projectContext": null,
+      "projectContext": {
+        "projectType": "C/C++ 系统",
+        "framework": "Spring Boot",
+        "modules": [
+          "订单管理",
+          "支付",
+          "优惠券",
+          "用户认证"
+        ],
+        "entryPoints": [],
+        "businessFlows": {
+          "订单流程": "创建订单 → 待支付 → 已支付 → 已发货 → 已完成",
+          "支付流程": "发起支付 → 调第三方 → 回调更新状态"
+        },
+        "stateMachine": {
+          "order": [
+            "PENDING",
+            "PAID",
+            "SHIPPED",
+            "COMPLETED",
+            "CANCELLED"
+          ]
+        },
+        "permissionModel": {},
+        "keyDataFlows": [
+          "HTTP 请求 → 控制器 → 服务层 → 数据库"
+        ],
+        "riskAreas": [
+          "状态迁移",
+          "金额处理",
+          "支付回调",
+          "幂等性",
+          "优惠券叠加",
+          "权限校验",
+          "会话管理",
+          "SQL 注入",
+          "命令注入",
+          "内存安全",
+          "缓冲区溢出",
+          "资源泄漏"
+        ],
+        "businessRules": [
+          "订单金额必须 > 0",
+          "已取消订单不可发货",
+          "支付必须幂等",
+          "回调必须验签",
+          "优惠券不可叠加使用",
+          "资源访问必须校验属主",
+          "malloc 必须配对 free",
+          "禁止使用 strcpy"
+        ],
+        "_understoodFiles": [
+          "unauthorized.html",
+          "app.py",
+          "horizontal.py",
+          "unauthorized.py",
+          "vertical.py"
+        ],
+        "_understoodAt": "2026-07-12T17:48:28.379Z"
+      },
       "learnSuggestions": [],
       "log": [
         {
           "state": "INIT",
           "msg": "开始归一化工具输出",
           "level": "info",
-          "at": "2026-07-12T15:58:15.130Z"
+          "at": "2026-07-12T17:48:28.290Z"
         },
         {
           "state": "INIT",
           "msg": "归一化完成，共 0 个 Finding 候选",
           "level": "info",
-          "at": "2026-07-12T15:58:15.130Z"
+          "at": "2026-07-12T17:48:28.290Z"
         },
         {
           "state": "PROJECT_UNDERSTAND",
           "msg": "开始理解项目...",
           "level": "info",
-          "at": "2026-07-12T15:58:15.132Z"
+          "at": "2026-07-12T17:48:28.292Z"
         },
         {
           "state": "PROJECT_UNDERSTAND",
-          "msg": "提取到 0 个关键文件",
+          "msg": "提取到 15 个关键文件",
           "level": "info",
-          "at": "2026-07-12T15:58:15.132Z"
+          "at": "2026-07-12T17:48:28.314Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "项目理解完成: C/C++ 系统 | 4 模块 | 12 高风险区域 | 8 业务规则",
+          "level": "info",
+          "at": "2026-07-12T17:48:28.379Z"
         },
         {
           "state": "LLM_HUNT",
           "msg": "LLM 自主挖掘开始（不依赖工具输出）",
           "level": "info",
-          "at": "2026-07-12T15:58:15.133Z"
+          "at": "2026-07-12T17:48:28.380Z"
         },
         {
           "state": "LLM_HUNT",
-          "msg": "检测到 Web URL，启用 Web 渗透测试模式",
+          "msg": "源代码切片完成，共 2884 个函数/方法",
           "level": "info",
-          "at": "2026-07-12T15:58:15.133Z"
+          "at": "2026-07-12T17:48:28.479Z"
         },
         {
           "state": "LLM_HUNT",
-          "msg": "Web 渗透测试开始",
+          "msg": "规则加载：120 条自定义 + 7 条内置",
           "level": "info",
-          "at": "2026-07-12T15:58:15.137Z"
+          "at": "2026-07-12T17:48:28.480Z"
         },
         {
           "state": "LLM_HUNT",
-          "msg": "爬取目标: http://43.139.114.76:3000/",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:obscureData (行 2-8)，匹配 14 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:28.482Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:fetchData (行 6-11)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:29.318Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:if (行 9-19)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:29.960Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:processResponse (行 17-23)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:30.725Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:shuffleString (行 21-25)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:31.427Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:for (行 23-32)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:32.038Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:periodicCheck (行 30-38)，匹配 12 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:32.517Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\infoleak\\system_info.js:init (行 36-45)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:33.231Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\serialize\\assist\\l1-pickle.py:(top-level) (行 1-9)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:33.757Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l1-sqli.py:(top-level) (行 1-29)，匹配 17 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:34.534Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l2-sqli.py:(top-level) (行 1-29)，匹配 16 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:35.552Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\pages\\sqli\\assist\\l3-sqli.py:(top-level) (行 1-29)，匹配 19 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:36.504Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_interopDefaultLegacy (行 9-15)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:37.645Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_defineProperties (行 13-16)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:38.237Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 14-25)，匹配 13 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:38.695Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_createClass (行 23-33)，匹配 11 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:39.497Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 31-36)，匹配 7 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:40.190Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:for (行 34-49)，匹配 8 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:40.625Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_inheritsLoose (行 47-56)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:41.116Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783878504450\\Pilot-Web-main\\pilot-client\\plugins\\bootstrap\\js\\bootstrap.bundle.js:_setPrototypeOf (行 54-79)，匹配 10 条规则",
+          "level": "debug",
+          "at": "2026-07-12T17:48:41.729Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘完成：分析 20/2884 片段，LLM 调用 231 次，发现 0 个漏洞（含业务逻辑）",
           "level": "info",
-          "at": "2026-07-12T15:58:15.137Z"
+          "at": "2026-07-12T17:48:42.334Z"
         },
         {
-          "state": "LLM_HUNT",
-          "msg": "爬取完成：1 个接口，0 个表单",
+          "state": "FILTER",
+          "msg": "误报库前置过滤开始",
           "level": "info",
-          "at": "2026-07-12T15:58:15.292Z"
+          "at": "2026-07-12T17:48:42.335Z"
         },
         {
-          "state": "LLM_HUNT",
-          "msg": "爬取结果不足，尝试常见测试路径...",
+          "state": "FILTER",
+          "msg": "过滤完成，0 个标记为误报",
           "level": "info",
-          "at": "2026-07-12T15:58:15.292Z"
+          "at": "2026-07-12T17:48:42.335Z"
         },
         {
-          "state": "LLM_HUNT",
-          "msg": "补充探测后：13 个接口，0 个表单",
+          "state": "DISPATCH",
+          "msg": "分类分发开始",
           "level": "info",
-          "at": "2026-07-12T15:58:15.559Z"
+          "at": "2026-07-12T17:48:42.335Z"
         },
         {
-          "state": "LLM_HUNT",
-          "msg": "状态执行失败: GLM API 401: {\"error\":{\"code\":\"401\",\"message\":\"令牌已过期或验证不正确\"}}",
-          "level": "error",
-          "at": "2026-07-12T15:58:15.723Z"
+          "state": "DISPATCH",
+          "msg": "分发完成：0 个进入深判，其余直通",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.335Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "深度判定开始，候选 0 个",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.336Z"
+        },
+        {
+          "state": "DETECT",
+          "msg": "检测完成：0 个确认，0 个误报",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.336Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "知识图谱关联开始",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.336Z"
+        },
+        {
+          "state": "RAG_MATCH",
+          "msg": "关联完成：0 个 Finding 建立图谱关系",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.336Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 变种挖掘开始",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.336Z"
+        },
+        {
+          "state": "ZERO_DAY",
+          "msg": "0-day 挖掘完成，生成 0 个候选",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.336Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证开始（可达性 + POC 生成 + 0-day 验证）",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "VERIFY",
+          "msg": "验证完成：0 个 POC，其中 0 个沙箱确认",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "开始构建攻击场景",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "ATTACK_SCENARIO",
+          "msg": "无漏洞，跳过攻击场景构建",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复生成 + 修复验证开始",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "FIX",
+          "msg": "修复完成：0 个 patch（含修复验证）",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习闭环开始",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "LEARN",
+          "msg": "学习完成：误报回灌 0 条，候选规则 0 条，图谱节点 3/3边",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
+        },
+        {
+          "state": "REPORT",
+          "msg": "报告生成完成",
+          "level": "info",
+          "at": "2026-07-12T17:48:42.352Z"
         }
       ]
     },
     "error": null,
-    "completedAt": "2026-07-12T15:58:15.724Z"
-  },
-  "scan-1783871959933": {
-    "scanId": "scan-1783871959933",
-    "status": "completed",
-    "startedAt": "2026-07-12T15:59:20.251Z",
-    "report": {
-      "scanId": "scan-1783871959933",
-      "startedAt": "2026-07-12T15:59:20.251Z",
-      "completedAt": "2026-07-12T15:59:20.616Z",
-      "current": "FAILED",
-      "findings": [],
-      "pocs": [],
-      "patches": [],
-      "attackScenario": null,
-      "projectContext": null,
-      "learnSuggestions": [],
-      "log": [
-        {
-          "state": "INIT",
-          "msg": "开始归一化工具输出",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.254Z"
-        },
-        {
-          "state": "INIT",
-          "msg": "归一化完成，共 0 个 Finding 候选",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.254Z"
-        },
-        {
-          "state": "PROJECT_UNDERSTAND",
-          "msg": "开始理解项目...",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.256Z"
-        },
-        {
-          "state": "PROJECT_UNDERSTAND",
-          "msg": "提取到 0 个关键文件",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.256Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.256Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "检测到 Web URL，启用 Web 渗透测试模式",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.256Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "Web 渗透测试开始",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.257Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "爬取目标: http://43.139.114.76:3000/",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.257Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "爬取完成：1 个接口，0 个表单",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.284Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "爬取结果不足，尝试常见测试路径...",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.284Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "补充探测后：13 个接口，0 个表单",
-          "level": "info",
-          "at": "2026-07-12T15:59:20.510Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "状态执行失败: GLM API 401: {\"error\":{\"code\":\"401\",\"message\":\"令牌已过期或验证不正确\"}}",
-          "level": "error",
-          "at": "2026-07-12T15:59:20.615Z"
-        }
-      ]
-    },
-    "error": null,
-    "completedAt": "2026-07-12T15:59:20.616Z"
-  },
-  "scan-1783871972802": {
-    "scanId": "scan-1783871972802",
-    "status": "completed",
-    "startedAt": "2026-07-12T15:59:32.808Z",
-    "report": {
-      "scanId": "scan-1783871972802",
-      "startedAt": "2026-07-12T15:59:32.808Z",
-      "completedAt": "2026-07-12T15:59:33.171Z",
-      "current": "FAILED",
-      "findings": [],
-      "pocs": [],
-      "patches": [],
-      "attackScenario": null,
-      "projectContext": null,
-      "learnSuggestions": [],
-      "log": [
-        {
-          "state": "INIT",
-          "msg": "开始归一化工具输出",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.808Z"
-        },
-        {
-          "state": "INIT",
-          "msg": "归一化完成，共 0 个 Finding 候选",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.808Z"
-        },
-        {
-          "state": "PROJECT_UNDERSTAND",
-          "msg": "开始理解项目...",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.813Z"
-        },
-        {
-          "state": "PROJECT_UNDERSTAND",
-          "msg": "提取到 0 个关键文件",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.813Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.814Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "检测到 Web URL，启用 Web 渗透测试模式",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.814Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "Web 渗透测试开始",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.814Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "爬取目标: http://localhost:3000/",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.814Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "爬取完成：1 个接口，0 个表单",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.836Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "爬取结果不足，尝试常见测试路径...",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.836Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "补充探测后：13 个接口，0 个表单",
-          "level": "info",
-          "at": "2026-07-12T15:59:32.942Z"
-        },
-        {
-          "state": "LLM_HUNT",
-          "msg": "状态执行失败: GLM API 401: {\"error\":{\"code\":\"401\",\"message\":\"令牌已过期或验证不正确\"}}",
-          "level": "error",
-          "at": "2026-07-12T15:59:33.171Z"
-        }
-      ]
-    },
-    "error": null,
-    "completedAt": "2026-07-12T15:59:33.171Z"
+    "completedAt": "2026-07-12T17:48:42.353Z"
   }
 }

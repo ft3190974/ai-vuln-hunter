@@ -63,7 +63,7 @@ const config = {
 
   // ── LLM 自主挖掘配置 ──
   llmHunt: {
-    maxSlices: Number(process.env.LLM_HUNT_MAX_SLICES) || 20, // 单次最多分析的函数切片数（控制成本）
+    maxSlices: Number(process.env.LLM_HUNT_MAX_SLICES) || 50, // 单次最多分析的函数切片数（控制成本）
     enabled: process.env.LLM_HUNT_ENABLED !== "0", // 默认启用
   },
 
