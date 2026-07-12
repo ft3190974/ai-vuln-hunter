@@ -236,9 +236,9 @@ export default function ScanPage() {
         {/* 路径模式 */}
         {mode === "path" && (
           <div className="form-group">
-            <label>源代码路径（文件或目录）</label>
+            <label>被测件路径（源码目录 / 固件 / 二进制文件）</label>
             <input value={manualPath} onChange={(e) => setManualPath(e.target.value)}
-              placeholder="/workspace/project 或 C:\project\src" />
+              placeholder="/opt/project/src 或 /tmp/firmware.bin 或 /home/user/app.jar" />
           </div>
         )}
 
