@@ -40,6 +40,17 @@ const TYPE_LABELS = {
   web_pentest: { label: "Web 渗透", color: "#f97316", icon: "🌐" },
 };
 
+const CATEGORY_CN = {
+  sqli: "SQL注入", cmdi: "命令注入", xss: "XSS跨站脚本", path_traversal: "路径穿越",
+  ssrf: "SSRF", overflow: "缓冲区溢出", uaf: "释放后使用", double_free: "双重释放",
+  fmt_string: "格式化字符串", deserialization: "反序列化", csrf: "CSRF", xxe: "XXE",
+  redirect: "开放重定向", crypto_weak: "弱加密", hardcoded_secret: "硬编码凭据",
+  business_logic: "业务逻辑", authz: "越权", authn: "认证缺陷", idor: "IDOR",
+  config: "配置缺陷", race_condition: "竞态条件", integer_overflow: "整数溢出",
+  prompt_injection: "提示词注入", jailbreak: "越狱", info_leak: "信息泄露",
+  output_injection: "输出注入", unsafe_tool_use: "不安全函数调用", unknown: "其他",
+};
+
 export default function TaskFindingsPage() {
   const { scanId } = useParams();
   const navigate = useNavigate();
@@ -159,7 +170,7 @@ export default function TaskFindingsPage() {
                 <>
                   <tr key={f.findingId} style={{ cursor: "pointer" }} onClick={() => setExpandedId(expandedId === f.findingId ? null : f.findingId)}>
                     <td style={{ fontFamily: "monospace", fontSize: 12 }}>{f.findingId}</td>
-                    <td><code>{f.category}</code></td>
+                    <td><code>{CATEGORY_CN[f.category] || f.category}</code></td>
                     <td><span className="badge" style={{ background: cfg.color + "30", color: cfg.color }}>{cfg.icon} {cfg.label}</span></td>
                     <td><SeverityBadge severity={f.severity} /></td>
                     <td>{(f.confidence * 100).toFixed(0)}%</td>
