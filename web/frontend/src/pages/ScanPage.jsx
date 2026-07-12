@@ -36,6 +36,10 @@ export default function ScanPage() {
   const [uploading, setUploading] = useState(false);
   const [webUrl, setWebUrl] = useState("");
   const [authConfirmed, setAuthConfirmed] = useState(false);
+  const [loginUrl, setLoginUrl] = useState("");
+  const [loginUser, setLoginUser] = useState("");
+  const [loginPass, setLoginPass] = useState("");
+  const [cookieStr, setCookieStr] = useState("");
   const [isAiProject, setIsAiProject] = useState(false);
   const [gitUrl, setGitUrl] = useState("");
   const [dragOver, setDragOver] = useState(false);
@@ -104,6 +108,10 @@ export default function ScanPage() {
       } else if (mode === "web" && webUrl.trim()) {
         if (!authConfirmed) { setError("请先勾选授权确认"); setSubmitting(false); return; }
         sourceInput = { type: "web", url: webUrl.trim() };
+        if (loginUrl.trim()) sourceInput.loginUrl = loginUrl.trim();
+        if (loginUser.trim()) sourceInput.loginUser = loginUser.trim();
+        if (loginPass.trim()) sourceInput.loginPass = loginPass.trim();
+        if (cookieStr.trim()) sourceInput.cookie = cookieStr.trim();
       } else if (mode === "path" && manualPath.trim()) {
         sourceInput = { path: manualPath.trim() };
       } else if (mode === "code" && code.trim()) {
@@ -323,6 +331,31 @@ export default function ScanPage() {
             <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
               系统将：① 爬取目标页面提取接口/参数 ② LLM 分析构造攻击 ③ 实际发送请求验证漏洞
             </p>
+
+            {/* 认证配置（可选） */}
+            <div style={{ marginTop: 16, padding: 12, border: "1px solid var(--border)", borderRadius: 8 }}>
+              <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 10 }}>🔐 认证配置（可选，用于测试需登录的系统）</p>
+              <div style={{ display: "flex", gap: 12 }}>
+                <div className="form-group" style={{ flex: 1, marginBottom: 8 }}>
+                  <label>登录 URL（留空则用目标 URL + /login）</label>
+                  <input value={loginUrl} onChange={(e) => setLoginUrl(e.target.value)} placeholder="http://target:8080/login" />
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <div className="form-group" style={{ flex: 1, marginBottom: 8 }}>
+                  <label>用户名</label>
+                  <input value={loginUser} onChange={(e) => setLoginUser(e.target.value)} placeholder="admin" />
+                </div>
+                <div className="form-group" style={{ flex: 1, marginBottom: 8 }}>
+                  <label>密码</label>
+                  <input type="password" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} placeholder="password" />
+                </div>
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label>或直接提供 Cookie/Token（优先于用户名密码）</label>
+                <input value={cookieStr} onChange={(e) => setCookieStr(e.target.value)} placeholder="JSESSIONID=xxx; token=yyy" />
+              </div>
+            </div>
           </div>
         )}
 
