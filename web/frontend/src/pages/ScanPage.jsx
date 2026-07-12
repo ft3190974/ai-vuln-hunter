@@ -34,6 +34,8 @@ export default function ScanPage() {
   const [uploading, setUploading] = useState(false);
   const [webUrl, setWebUrl] = useState("");
   const [authConfirmed, setAuthConfirmed] = useState(false);
+  const [isAiProject, setIsAiProject] = useState(false);
+  const [gitUrl, setGitUrl] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [manualPath, setManualPath] = useState("");
   const [code, setCode] = useState("");
@@ -81,9 +83,13 @@ export default function ScanPage() {
     try {
       const id = `scan-${Date.now()}`;
       setScanId(id);
+      // ★ Git 地址优先处理（clone 后走静态分析）
       let sourceInput;
-
-      if (mode === "upload" && uploadedFile) {
+      if (gitUrl.trim()) {
+        sourceInput = { gitUrl: gitUrl.trim(), type: "git" };
+        if (isAiProject) sourceInput.aiSecurity = true;
+        if (language) sourceInput.language = language;
+      } else if (mode === "upload" && uploadedFile) {
         const f = uploadedFile;
         if (f.type === "source_dir") {
           sourceInput = { path: f.path };
@@ -145,7 +151,7 @@ export default function ScanPage() {
   const reachedStates = new Set();
   if (job?.report?.log) job.report.log.forEach((l) => reachedStates.add(l.state));
 
-  const canSubmit = (mode === "upload" && uploadedFile) || (mode === "path" && manualPath.trim()) || (mode === "code" && code.trim()) || (mode === "web" && webUrl.trim() && authConfirmed);
+  const canSubmit = gitUrl.trim() || (mode === "upload" && uploadedFile) || (mode === "path" && manualPath.trim()) || (mode === "code" && code.trim()) || (mode === "web" && webUrl.trim() && authConfirmed);
 
   return (
     <div>
@@ -168,7 +174,7 @@ export default function ScanPage() {
       </div>
 
       <div className="card">
-        {/* 语言选择（通用，可选） */}
+        {/* 语言选择 + AI 项目选项 */}
         <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
           <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
             <label>语言（可选，留空自动识别）</label>
@@ -182,6 +188,23 @@ export default function ScanPage() {
               <option value="php">PHP</option>
             </select>
           </div>
+          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+            <label>AI/LLM 项目？（启用 AI 安全检测）</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, height: 36 }}>
+              <input type="checkbox" id="aiProject" checked={isAiProject}
+                onChange={(e) => setIsAiProject(e.target.checked)} style={{ width: "auto" }} />
+              <label htmlFor="aiProject" style={{ marginBottom: 0, fontSize: 13, color: isAiProject ? "#14b8a6" : "var(--text-dim)" }}>
+                {isAiProject ? "🧠 已启用 AI 安全检测（提示词注入/越狱/Skill 漏洞/模型 RCE）" : "勾选启用"}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Git 仓库地址（拉取源码扫描） */}
+        <div className="form-group">
+          <label>Git 仓库地址（可选，填入后自动 clone 拉取源码）</label>
+          <input value={gitUrl} onChange={(e) => setGitUrl(e.target.value)}
+            placeholder="https://github.com/org/repo.git" />
         </div>
 
         {/* 上传模式 */}

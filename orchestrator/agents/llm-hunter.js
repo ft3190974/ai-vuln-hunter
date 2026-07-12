@@ -46,10 +46,31 @@ async function hunt(ctx, deps) {
 
   // ★ Web 渗透测试：URL 输入时实际发起请求测试
   const isWebUrl = (sourceInput.type === "web") || /^https?:\/\//.test(sourceInput.path || sourceInput.code || sourceInput.url || "");
-  if (isWebUrl) {
+  if (isWebUrl && sourceInput.type !== "git") {
     ctx.log_("LLM_HUNT", "检测到 Web URL，启用 Web 渗透测试模式", "info");
     const webHunter = require("./web-pentest-hunter");
     return webHunter.hunt(ctx, deps);
+  }
+
+  // ★ Git 仓库 clone（用户输入 Git 地址拉取源码）
+  if (sourceInput.gitUrl) {
+    ctx.log_("LLM_HUNT", `Git clone: ${sourceInput.gitUrl}`, "info");
+    const { cloneRepo } = require("./git-clone");
+    try {
+      const cloned = cloneRepo(sourceInput.gitUrl);
+      sourceInput.path = cloned.path;
+      ctx.log_("LLM_HUNT", `Clone 完成: ${cloned.repoName} → ${cloned.path}`, "info");
+    } catch (e) {
+      ctx.log_("LLM_HUNT", `Clone 失败: ${e.message}`, "error");
+      return ctx;
+    }
+  }
+
+  // ★ AI 安全模式：检测 LLM 应用 / Skill / MCP / 模型项目漏洞
+  if (sourceInput.aiSecurity) {
+    ctx.log_("LLM_HUNT", "检测到 AI 安全模式，启用 AI 安全漏洞挖掘（3 维度）", "info");
+    const aiSecHunter = require("./ai-security-hunter");
+    return aiSecHunter.hunt(ctx, deps);
   }
 
   // ★ Java 二进制（.jar/.class）：反编译后走源码分析
