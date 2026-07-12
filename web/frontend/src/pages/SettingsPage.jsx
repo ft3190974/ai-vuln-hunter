@@ -105,6 +105,7 @@ function LlmConfig() {
               <td><span className={`badge badge-${c.enabled ? "confirmed" : "false_positive"}`}>{c.enabled ? "启用" : "禁用"}</span></td>
               <td>{testResult?.id === c.id ? (testResult.testing ? "测试中..." : <span style={{ color: testResult.success ? "#86efac" : "#fca5a5" }}>{testResult.success ? "✓" : "✗"} {testResult.message?.slice(0, 30)}</span>) : "—"}</td>
               <td>
+                <button className="secondary" style={{ fontSize: 12, padding: "4px 8px", marginRight: 4 }} onClick={async () => { await api.updateLlmConfig(c.id, { enabled: !c.enabled }); await load(); }}>{c.enabled ? "禁用" : "启用"}</button>
                 <button className="secondary" style={{ fontSize: 12, padding: "4px 8px", marginRight: 4 }} onClick={() => test(c.id)}>测试</button>
                 <button className="secondary" style={{ fontSize: 12, padding: "4px 8px", marginRight: 4 }} onClick={() => setEditing(c)}>编辑</button>
                 {!c.isDefault && <button className="secondary" style={{ fontSize: 12, padding: "4px 8px", color: "#fca5a5" }} onClick={async () => { await api.deleteLlmConfig(c.id); await load(); }}>删除</button>}
