@@ -48,7 +48,50 @@ async function ragMatch(ctx, deps) {
 async function verify(ctx, deps) {
   const { findingStore } = deps;
   const llm = getLlm();
-  ctx.log_("VERIFY", "验证开始（可达性 + POC 生成）", "info");
+  const sandbox = await getSandbox();
+  ctx.log_("VERIFY", "验证开始（可达性 + POC 生成 + 0-day 验证）", "info");
+
+  // ── 0-day 候选验证：必须经过沙箱验证才算真 0-day ──
+  const zeroDayCandidates = ctx.findings.filter((f) => f.isZeroDay);
+  if (zeroDayCandidates.length > 0) {
+    ctx.log_("VERIFY", `${zeroDayCandidates.length} 个 0-day 候选待验证`, "info");
+    for (const f of zeroDayCandidates) {
+      // 用 LLM 生成 POC（基于变种描述）
+      const pocPrompt = `为以下 0-day 变种生成 POC（结构化描述）。\n变种描述: ${f.title}\n原始漏洞: ${f.description?.slice(0, 200) || "?"}\n请返回 JSON: {poc:{entry,payload,precondition,expected}, confidence:0-1}`;
+      const pocResult = await llm.complete(pocPrompt, { difficulty: "high", jsonMode: true });
+      const pocData = pocResult.structured?.poc || pocResult.structured || {};
+
+      // 沙箱执行
+      const execResult = await sandbox.execute({
+        poc: { vulnType: f.category, entry: pocData.entry || "(变种)", payload: pocData.payload || "(变种)", precondition: pocData.precondition || "", expected: pocData.expected || "" },
+        targetType: "web",
+      });
+
+      if (execResult.triggered && (f.confidence >= 0.7 || (pocResult.structured?.confidence || 0) >= 0.7)) {
+        // 沙箱验证通过 + 置信度达标 → 真正的 0-day
+        f.zeroDayVerified = true;
+        f.confidence = Math.min(f.confidence + 0.1, 0.99);
+        f.poc = {
+          vulnType: f.category,
+          entry: pocData.entry || "(变种)",
+          payload: pocData.payload || "(变种)",
+          precondition: pocData.precondition || "",
+          expected: pocData.expected || "",
+          sandboxVerified: true,
+          sandboxEvidence: execResult.evidence,
+          confidence: f.confidence,
+        };
+        ctx.log_("VERIFY", `0-day 验证通过 ✓ ${f.findingId}: ${f.title?.slice(0, 40)}`, "info");
+      } else {
+        // 沙箱未触发 或 置信度不足 → 降级为"0-day 候选"（不算真正的 0-day）
+        f.zeroDayVerified = false;
+        f.isZeroDay = false; // 降级：不再标记为 0-day
+        f.confidence = Math.max(f.confidence - 0.15, 0.3);
+        f.reviewerNote = (f.reviewerNote || "") + " [0-day 候选沙箱验证未通过，已降级为疑似变种]";
+        ctx.log_("VERIFY", `0-day 验证未通过 ✗ ${f.findingId}，降级为疑似变种`, "info");
+      }
+    }
+  }
 
   for (const f of ctx.findings) {
     if (f.status !== "confirmed" && f.status !== "candidate") continue;

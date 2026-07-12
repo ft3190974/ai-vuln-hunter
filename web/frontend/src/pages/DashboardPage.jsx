@@ -67,7 +67,9 @@ export default function DashboardPage() {
         <MetricCard label="近 7 天新增" value={m.newThisWeek} icon="📈" color="#f97316" />
         <MetricCard label="POC 生成数" value={m.pocCount} icon="⚔️" color="#a855f7"
           sub={m.totalFindings ? `覆盖率 ${((m.pocCount / m.totalFindings) * 100).toFixed(0)}%` : ""} />
-        <MetricCard label="0-day 候选" value={m.zeroDayCount} icon="⚡" color="#fbbf24" />
+        <MetricCard label="已验证 0-day" value={m.zeroDayCount} icon="⚡" color="#fbbf24" />
+        <MetricCard label="0-day 候选" value={m.zeroDayCandidateCount} icon="🔍" color="#a855f7"
+          sub={m.zeroDayCount + m.zeroDayCandidateCount > 0 ? `已验证 ${m.zeroDayCount} / 候选 ${m.zeroDayCandidateCount}` : ""} />
       </div>
 
       {/* 趋势柱状图 */}

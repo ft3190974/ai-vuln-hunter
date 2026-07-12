@@ -19,7 +19,8 @@ function dashboardRoutes({ engine }) {
       const logicVulns = findings.filter((f) => f.category === "business_logic").length;
       const highSeverity = findings.filter((f) => ["critical", "high"].includes(f.severity)).length;
       const pocCount = findings.filter((f) => f.poc).length;
-      const zeroDayCount = findings.filter((f) => f.isZeroDay).length;
+      const zeroDayCount = findings.filter((f) => f.isZeroDay && f.zeroDayVerified).length;
+      const zeroDayCandidateCount = findings.filter((f) => f.isZeroDay && !f.zeroDayVerified).length;
 
       // 近 7 天新增
       const now = Date.now();
@@ -78,6 +79,7 @@ function dashboardRoutes({ engine }) {
           newThisWeek,
           pocCount,
           zeroDayCount,
+          zeroDayCandidateCount,
         },
         trend,
         categoryDist,

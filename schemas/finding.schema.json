@@ -171,6 +171,11 @@
       "description": "是否为 0-day（非已知 CVE 的变种挖掘结果）",
       "default": false
     },
+    "zeroDayVerified": {
+      "type": "boolean",
+      "description": "0-day 是否经过沙箱验证（true=已验证可利用，false=未验证/验证失败）",
+      "default": false
+    },
     "businessContext": {
       "type": "object",
       "description": "业务上下文（业务逻辑漏洞专用）",
