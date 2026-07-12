@@ -328,9 +328,22 @@ export default function ScanPage() {
 
         {error && <div className="msg msg-error" style={{ marginTop: 12 }}>{error}</div>}
 
-        <button onClick={submit} disabled={!canSubmit || submitting} style={{ marginTop: 16 }}>
-          {submitting ? "🔍 挖掘中..." : "🚀 开始挖掘"}
+        <button onClick={submit} disabled={!canSubmit || submitting}
+          style={{
+            marginTop: 16,
+            opacity: submitting ? 0.7 : 1,
+            cursor: submitting ? "wait" : "pointer",
+            background: submitting ? "var(--border)" : undefined,
+            color: submitting ? "var(--accent)" : undefined,
+          }}>
+          {submitting ? "⏳ 正在挖掘中...（请勿重复提交，预计 1-5 分钟）" : "🚀 开始挖掘"}
         </button>
+        {submitting && (
+          <div className="msg msg-info" style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="loading" style={{ fontSize: 18 }}>🔄</span>
+            <span>任务进行中：LLM 正在分析，编排引擎逐个状态执行。请耐心等待，可在下方查看实时进度。</span>
+          </div>
+        )}
       </div>
 
       {scanId && !job && submitting && (
