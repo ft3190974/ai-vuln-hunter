@@ -140,6 +140,26 @@ function scanRoutes({ engine, scanJobs }) {
     }
   });
 
+  // 清理孤儿 Finding：没有对应任务记录的 finding（任务已被手动删但 finding 残留，
+  // 或早期无 scanId 的 finding）。返回清理数量。
+  router.delete("/scan/orphans/cleanup", async (_req, res) => {
+    try {
+      const allFindings = await engine.findingStore.all();
+      const validScanIds = new Set(scanJobs.keys());
+      let removed = 0;
+      for (const f of allFindings) {
+        // scanId 为空，或 scanId 指向的任务已不存在 → 孤儿
+        if (!f.scanId || !validScanIds.has(f.scanId)) {
+          await engine.findingStore.remove(f.findingId);
+          removed++;
+        }
+      }
+      res.json({ removed, remaining: (await engine.findingStore.all()).length });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   return router;
 }
 

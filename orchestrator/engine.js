@@ -138,10 +138,14 @@ class OrchestratorEngine {
     }
     ctx.completedAt = ctx.completedAt || new Date().toISOString();
 
-    // 给所有 Finding 补 scanId（用于按任务隔离查询）
+    // 给所有 Finding 补 scanId 并持久化（用于按任务隔离查询 + 删除任务时联动清理）
     const scanId = scanRequest.scanId;
     for (const f of ctx.findings) {
-      if (!f.scanId) f.scanId = scanId;
+      if (!f.scanId) {
+        f.scanId = scanId;
+        // 持久化到 store（之前只改了内存引用，重启/删除时会丢失关联）
+        try { await this.findingStore_.update(f.findingId, { scanId }); } catch {}
+      }
     }
 
     return ctx.toReport();

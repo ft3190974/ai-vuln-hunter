@@ -44,11 +44,33 @@ export default function TasksPage() {
     }
   };
 
+  // 清理孤儿数据：任务已删但漏洞残留、或早期无 scanId 关联的漏洞
+  const cleanupOrphans = async () => {
+    if (!confirm("清理残留漏洞数据？\n\n这会删除所有没有对应任务记录的漏洞（任务已被删除但漏洞未清理的情况）。\n清理后态势总览数据会同步更新。")) return;
+    try {
+      const r = await api.cleanupOrphanFindings();
+      alert(`清理完成：删除了 ${r.removed} 个残留漏洞，剩余 ${r.remaining} 个`);
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   if (loading && tasks.length === 0) return <p className="loading">加载中...</p>;
 
   return (
     <div>
-      <h1>任务管理</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h1 style={{ margin: 0 }}>任务管理</h1>
+        <button
+          className="secondary"
+          style={{ fontSize: 13, padding: "6px 12px" }}
+          onClick={cleanupOrphans}
+          title="清理任务已删除但漏洞残留的数据，同步更新态势总览"
+        >
+          🧹 清理残留数据
+        </button>
+      </div>
 
       {error && <div className="msg msg-error">{error}</div>}
 

@@ -31,6 +31,10 @@ Thumbs.db
 # 运行时设置（含 LLM API Key 等密钥，不入库）
 data/settings.json
 
+# 运行时漏洞数据（用户扫描结果，不入库）
+data/findings.json
+web/server/data/
+
 # 上传的文件（用户数据）
 C:/tmp/avh-uploads/
 C:/tmp/avh_src_*

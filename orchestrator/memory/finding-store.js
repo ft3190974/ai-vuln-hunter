@@ -6,7 +6,9 @@
 const fs = require("fs");
 const path = require("path");
 
-const PERSIST_FILE = process.env.FINDING_STORE_FILE || path.join(process.cwd(), "data", "findings.json");
+// 持久化文件统一放在项目根 data/ 下（与 scan-jobs.json / settings.json 同目录）
+// 用 __dirname 而非 process.cwd()，避免从 web/server 启动时写到 web/server/data/
+const PERSIST_FILE = process.env.FINDING_STORE_FILE || path.resolve(__dirname, "..", "..", "data", "findings.json");
 
 class FindingStore {
   constructor() {
