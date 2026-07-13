@@ -104,22 +104,36 @@ echo "  ✓ 后端依赖就绪"
 # ── 5. 安装 PM2（进程管理，保证服务不中断）──
 echo ""
 echo "[5/6] 配置进程管理..."
+
+# 确保 data/ 目录存在（持久化文件：scan-jobs.json / findings.json / settings.json）
+mkdir -p "$APP_DIR/data"
+# 迁移旧版错位数据：早期 finding-store 用 process.cwd()，可能把 findings.json 写到 web/server/data/
+if [ -f "$APP_DIR/web/server/data/findings.json" ] && [ ! -f "$APP_DIR/data/findings.json" ]; then
+  echo "  迁移 web/server/data/findings.json → data/findings.json"
+  mv "$APP_DIR/web/server/data/findings.json" "$APP_DIR/data/findings.json"
+fi
+# 首次部署用模板初始化 settings.json（含 LLM 配置结构，用户在界面改）
+if [ ! -f "$APP_DIR/data/settings.json" ] && [ -f "$APP_DIR/data/settings.example.json" ]; then
+  cp "$APP_DIR/data/settings.example.json" "$APP_DIR/data/settings.json"
+  echo "  初始化 data/settings.json（请在 /settings 页面配置 LLM）"
+fi
+
 if ! command -v pm2 &> /dev/null; then
   echo "  安装 PM2..."
   sudo npm install -g pm2
 fi
 
 # 停止旧进程（如果有）
-pm2 delete ai-vuln-hunter 2>/dev/null || true
+pm2 delete ai-vuln-hunter 2> /dev/null || true
 
-# 启动服务
-cd web/server
-pm2 start app.js --name ai-vuln-hunter --env production
+# 启动服务（cwd 设为项目根，确保日志/相对路径一致）
+cd "$APP_DIR/web/server"
+pm2 start app.js --name ai-vuln-hunter --env production --cwd "$APP_DIR/web/server"
 pm2 save
-cd ../..
+cd "$APP_DIR"
 
 # 设置开机自启
-pm2 startup 2>/dev/null || true
+pm2 startup 2> /dev/null || true
 
 echo "  ✓ 服务已启动（PM2 管理）"
 
@@ -141,6 +155,10 @@ echo "    状态查看:   pm2 status"
 echo ""
 echo "  防火墙（如果需要开放端口）:"
 echo "    sudo ufw allow 3000/tcp"
+echo ""
+echo "  升级说明（从旧版升级）:"
+echo "    若态势总览数据与实际不符（删了任务但漏洞数没变），"
+echo "    去「任务管理」页点「🧹 清理残留数据」按钮即可同步。"
 echo ""
 echo "  可选配置（在启动前设置环境变量）:"
 echo "    export LLM_MODE=glm && export GLM_API_KEY=你的key  # 启用真实 GLM"
