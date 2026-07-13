@@ -1,1 +1,175 @@
-{}
+{
+  "scan-1783909679437": {
+    "scanId": "scan-1783909679437",
+    "status": "running",
+    "startedAt": "2026-07-13T02:27:59.520Z",
+    "report": null,
+    "error": null
+  },
+  "scan-1783909747183": {
+    "scanId": "scan-1783909747183",
+    "status": "completed",
+    "startedAt": "2026-07-13T02:29:07.184Z",
+    "report": {
+      "scanId": "scan-1783909747183",
+      "startedAt": "2026-07-13T02:29:07.185Z",
+      "completedAt": "2026-07-13T02:30:16.938Z",
+      "current": "FAILED",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": {
+        "projectType": "安全靶场系统/漏洞演示平台",
+        "framework": "Flask (Python) + Flask CORS + Blueprint + AdminLTE (前端)",
+        "modules": [
+          "bruteforce (暴力破解)",
+          "vcdefect (验证码缺陷)",
+          "infoleak (信息泄露)",
+          "authority (权限控制：未授权、水平越权、垂直越权)",
+          "sqli (SQL注入：MySQL, MSSQL, PostgreSQL)",
+          "xss (跨站脚本攻击：反射型、存储型)",
+          "urlredirect (URL重定向)",
+          "ssrf (服务端请求伪造)",
+          "csrf (跨站请求伪造)",
+          "upload (文件上传：客户端校验、服务端校验1/2、目录)",
+          "download (文件下载)",
+          "rce (远程命令执行：常规、Ping)",
+          "ssti (模板注入：Jinja2)",
+          "xxe (XML外部实体注入)",
+          "serialize (反序列化)"
+        ],
+        "entryPoints": [
+          "/api/auth/l1/login",
+          "/api/auth/l1/getAuthinfo",
+          "/api/auth/l2/login",
+          "/api/auth/l2/getUserinfo",
+          "/api/auth/l2/modifyUserInfo",
+          "/api/auth/l3/login",
+          "/api/auth/l3/getUserinfo",
+          "/api/auth/l3/modifyUserInfo"
+        ],
+        "businessFlows": {
+          "用户认证流程": "客户端提交用户名密码 -> 后端使用MD5加密密码 -> 查询数据库验证 -> 验证成功则生成并返回Token",
+          "权限信息获取流程": "客户端携带Authorization头和参数n(用户名)发起请求 -> 后端校验Token与用户名是否匹配 -> 校验通过后查询并返回用户信息(包含UID、PID等)",
+          "用户信息修改流程": "客户端携带Token及修改的用户信息(用户名、手机号、QQ)发起POST请求 -> 后端校验Token -> 执行修改操作"
+        },
+        "stateMachine": {
+          "用户认证状态": [
+            "未登录",
+            "已登录(普通用户)",
+            "已登录(管理员)"
+          ],
+          "legal_transitions": [
+            "未登录 -> 已登录(普通用户)",
+            "未登录 -> 已登录(管理员)"
+          ],
+          "suspected_illegal_transitions": [
+            "已登录(普通用户) -> 已登录(管理员) (通过未授权访问接口直接获取管理员权限信息)"
+          ]
+        },
+        "permissionModel": {
+          "普通用户": [
+            "/api/auth/l2/login",
+            "/api/auth/l2/getUserinfo",
+            "/api/auth/l2/modifyUserInfo",
+            "/api/auth/l3/login",
+            "/api/auth/l3/getUserinfo",
+            "/api/auth/l3/modifyUserInfo"
+          ],
+          "管理员(UID=1)": [
+            "/api/auth/l1/login",
+            "/api/auth/l1/getAuthinfo"
+          ]
+        },
+        "keyDataFlows": [
+          "用户输入(表单/参数) -> Flask request -> 装饰器校验 -> 业务函数 -> query_db/modify_db -> 数据库",
+          "鉴权数据流: HTTP Header(Authorization) + GET参数 -> verify_token校验 -> 返回鉴权结果"
+        ],
+        "riskAreas": [
+          "权限校验机制：水平越权、垂直越权、未授权访问",
+          "认证机制：MD5弱加密、可能存在的Token伪造或暴力破解",
+          "业务逻辑漏洞：修改用户信息接口可能未严格校验当前用户是否有权修改目标用户信息"
+        ],
+        "businessRules": [
+          "用户密码在数据库中必须以MD5摘要形式存储",
+          "获取L1级别权限信息要求当前用户UID必须为1",
+          "所有需要鉴权的接口必须携带Authorization头且Token需与请求的用户名匹配"
+        ],
+        "_understoodFiles": [
+          "app.py",
+          "unauthorized.py",
+          "unauthorized.html",
+          "horizontal.py",
+          "vertical.py"
+        ],
+        "_understoodAt": "2026-07-13T02:29:23.781Z"
+      },
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-13T02:29:07.185Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-13T02:29:07.185Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-13T02:29:07.186Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 15 个关键文件",
+          "level": "info",
+          "at": "2026-07-13T02:29:07.251Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "项目理解完成: 安全靶场系统/漏洞演示平台 | 15 模块 | 3 高风险区域 | 3 业务规则",
+          "level": "info",
+          "at": "2026-07-13T02:29:23.781Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "LLM 自主挖掘开始（不依赖工具输出）",
+          "level": "info",
+          "at": "2026-07-13T02:29:23.781Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "源代码切片完成，共 150 个函数/方法",
+          "level": "info",
+          "at": "2026-07-13T02:29:23.866Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "规则加载：120 条自定义 + 7 条内置",
+          "level": "info",
+          "at": "2026-07-13T02:29:23.866Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "分析 C:\\tmp\\avh_src_1783909674734\\Pilot-Web-main\\pilot-server\\app.py:set_response_content_type (行 68-76)，匹配 9 条规则",
+          "level": "debug",
+          "at": "2026-07-13T02:29:23.867Z"
+        },
+        {
+          "state": "LLM_HUNT",
+          "msg": "状态执行失败: This operation was aborted",
+          "level": "error",
+          "at": "2026-07-13T02:30:16.938Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-13T02:30:16.939Z"
+  }
+}

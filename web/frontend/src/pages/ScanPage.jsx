@@ -53,9 +53,15 @@ export default function ScanPage() {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // 文件上传处理
+  // 文件上传处理（带前端大小预检）
+  const MAX_UPLOAD_MB = 20;
   const handleFile = async (file) => {
     setError(null);
+    // 前端预检：超过 20MB 直接拦截，避免传一半才失败
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      setError(`文件过大（${(file.size / 1024 / 1024).toFixed(1)} MB），当前限制 ${MAX_UPLOAD_MB} MB。请压缩或拆分后上传。`);
+      return;
+    }
     setUploading(true);
     setUploadedFile(null);
     try {
@@ -138,10 +144,12 @@ export default function ScanPage() {
   };
 
   const pollJob = async (id) => {
+    let consecutiveErrors = 0; // 连续失败计数（服务崩溃/重启时容错）
     for (let i = 0; i < 120; i++) {
       await new Promise((r) => setTimeout(r, 500));
       try {
         const j = await api.getScan(id);
+        consecutiveErrors = 0; // 请求成功，重置
         setJob(j);
         if (j.status === "completed" || j.status === "failed") {
           setSubmitting(false);
@@ -149,9 +157,14 @@ export default function ScanPage() {
           return;
         }
       } catch (e) {
-        setError(e.message);
-        setSubmitting(false);
-        return;
+        consecutiveErrors++;
+        // 服务可能崩溃/重启中，容忍前 6 次连续失败（≈3 秒），超过才判定失败
+        if (consecutiveErrors >= 6) {
+          setError(`服务暂不可用：${e.message}（可能因扫描目标过大导致服务重启，请减小被测包后重试）`);
+          setSubmitting(false);
+          return;
+        }
+        // 否则继续轮询，等服务恢复
       }
     }
     setSubmitting(false);
@@ -277,6 +290,9 @@ export default function ScanPage() {
                   <p style={{ color: "var(--text-dim)" }}>点击或拖拽文件到此处上传</p>
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>
                     支持：源码包 (.zip/.tar.gz)、Java 二进制 (.jar/.class)、C/C++ 二进制 (.bin/.elf/.exe)
+                  </p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
+                    ⚠️ 大小限制 <strong style={{ color: "var(--accent)" }}>{MAX_UPLOAD_MB} MB</strong>（demo 环境，大包易内存溢出）
                   </p>
                 </div>
               )}

@@ -40,6 +40,9 @@ const TMP_DIR = getAsciiTempDir();
 const UPLOAD_DIR = path.join(TMP_DIR, "avh-uploads");
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+// 最大上传大小：20MB（demo 环境，大包易触发内存溢出）
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: UPLOAD_DIR,
@@ -48,7 +51,7 @@ const upload = multer({
       cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
     },
   }),
-  limits: { fileSize: 100 * 1024 * 1024 },
+  limits: { fileSize: MAX_UPLOAD_BYTES },
   fileFilter: (req, file, cb) => {
     const exts = [".zip", ".bin", ".elf", ".exe", ".so", ".dll", ".o", ".jar", ".class", ".img", ".fw", ".tar", ".gz",
       ".md", ".war", ".zpk", ".java", ".py", ".js", ".ts", ".jsx", ".tsx", ".go", ".c", ".h", ".cpp", ".cc", ".hpp", ".php", ".rb", ".rs", ".kt", ".swift", ".scala", ".lua", ".sh", ".json", ".yaml", ".yml", ".xml", ".txt", ".toml"];
@@ -58,10 +61,26 @@ const upload = multer({
   },
 });
 
+// multer 文件超限错误处理（统一返回中文提示）
+function formatUploadError(err) {
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return { error: `文件过大，当前限制 ${(MAX_UPLOAD_BYTES / 1024 / 1024).toFixed(0)}MB。大包请拆分后再上传，或联系管理员调高配置。` };
+  }
+  return { error: err.message };
+}
+
 function uploadRoutes() {
   const router = express.Router();
 
-  router.post("/upload", upload.single("file"), async (req, res) => {
+  router.post("/upload", (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        // multer 错误（文件过大、类型不符等）→ 友好返回
+        return res.status(400).json(formatUploadError(err));
+      }
+      next();
+    });
+  }, async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "未上传文件" });
