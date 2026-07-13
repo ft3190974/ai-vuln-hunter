@@ -1,0 +1,32 @@
+{
+  "llmConfigs": [
+    {
+      "id": "llm-default",
+      "name": "默认 Mock LLM",
+      "provider": "mock",
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+      "apiKey": "",
+      "model": "glm-4-plus",
+      "temperature": 0.2,
+      "maxTokens": 2048,
+      "difficulty": "auto",
+      "enabled": true,
+      "isDefault": true,
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "toolConfigs": [
+    {
+      "id": "tool-example-sast",
+      "name": "示例：软安 SAST",
+      "toolType": "SAST",
+      "mcpCommand": "node",
+      "mcpArgs": "/path/to/ruanan-sast-mcp/server.js",
+      "mcpUrl": "",
+      "autoRun": true,
+      "enabled": false,
+      "isExample": true,
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

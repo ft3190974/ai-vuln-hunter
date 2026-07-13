@@ -103,11 +103,22 @@ cd web/frontend && npm install && npm run dev
 
 ### LLM 切换（默认 Mock，零依赖）
 
+**推荐：在 Web 界面 `/settings` 配置**（运行时可改，无需重启，支持连通测试）。系统按 `baseUrl` 自动选择协议：
+
+| 场景 | baseUrl | 模型 | 协议 |
+|---|---|---|---|
+| **GLM Coding Plan** | `https://open.bigmodel.cn/api/anthropic` | `glm-5.2` | Anthropic Messages |
+| **GLM 按量付费** | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` / `glm-4-plus` | OpenAI Chat |
+
+> ⚠️ 注意：GLM Coding Plan 套餐额度**只在官方支持的编程工具中可用**（Claude Code、Cursor、ZCode 等）。自建应用走按量付费 API。
+
+也可用环境变量（启动前设置）：
+
 ```bash
 # 默认 Mock（本地即跑，无需 API key）
 node app.js
 
-# 真实 GLM
+# 真实 GLM（按量付费 API）
 set LLM_MODE=glm
 set GLM_API_KEY=你的智谱API Key
 node app.js

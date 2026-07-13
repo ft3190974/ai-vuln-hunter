@@ -1,13 +1,20 @@
 // llm/glm-adapter.js — GLM（智谱）适配器
 //
-// 通过原生 fetch 调用智谱 GLM API。所有连接参数从环境变量读取，
-// 默认指向智谱官方，可改为私有化部署地址（数据不出网场景）。
+// 通过原生 fetch 调用智谱 GLM API。支持两种协议，按 baseUrl 自动选择：
 //
-// 环境变量（见 config.js）：
-//   GLM_BASE_URL  GLM_API_KEY  GLM_MODEL
+//   1) Anthropic 协议（GLM Coding Plan 的 glm-5.2 走这个）
+//      baseUrl = https://open.bigmodel.cn/api/anthropic
+//      实际端点 = {baseUrl}/v1/messages
+//      Header: x-api-key + anthropic-version
+//      响应: data.content[].text
 //
-// 智谱 GLM API 参考：POST {base_url}/chat/completions
-//   { model, messages:[{role,content}], temperature, max_tokens }
+//   2) OpenAI 协议（按量付费 API，glm-4-flash / glm-4-plus 等）
+//      baseUrl = https://open.bigmodel.cn/api/paas/v4
+//      实际端点 = {baseUrl}/chat/completions
+//      Header: Authorization: Bearer
+//      响应: data.choices[0].message.content
+//
+// 协议判断依据：baseUrl 是否含 "/anthropic"。
 
 const { ILlm } = require("./interface");
 const config = require("../config");
@@ -16,15 +23,14 @@ class GlmAdapter extends ILlm {
   constructor() {
     super();
     let baseUrl = config.llm.glm.baseUrl || "https://open.bigmodel.cn/api/paas/v4";
-    if (baseUrl.includes("/anthropic") || baseUrl.includes("/chat/completions")) {
-      baseUrl = "https://open.bigmodel.cn/api/paas/v4";
-      console.warn("[GLM] 检测到非标准路径，已自动修正为 paas/v4");
-    }
     if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
     this.baseUrl = baseUrl;
     this.apiKey = config.llm.glm.apiKey;
     this.models = config.llm.glm.models;
     this._lastCallTime = 0;
+    // 协议判定：含 /anthropic 走 Anthropic 协议
+    this.useAnthropic = /\/anthropic(\/|$)/i.test(baseUrl);
+    console.log(`[GLM] 初始化: protocol=${this.useAnthropic ? "anthropic" : "openai"}, baseUrl=${this.baseUrl}, model=${this.models.high}`);
   }
 
   /**
@@ -35,7 +41,7 @@ class GlmAdapter extends ILlm {
     const elapsed = now - this._lastCallTime;
     const minInterval = 1500; // 1.5 秒/次 ≈ 40 RPM
     if (elapsed < minInterval) {
-      await new Promise(r => setTimeout(r, minInterval - elapsed));
+      await new Promise((r) => setTimeout(r, minInterval - elapsed));
     }
     this._lastCallTime = Date.now();
   }
@@ -47,8 +53,8 @@ class GlmAdapter extends ILlm {
       } catch (e) {
         if (e.message?.includes("429") && attempt < maxRetries) {
           const waitMs = 5000 * (attempt + 1); // 5s, 10s 退避
-          console.warn(`[GLM] 429 限流，${waitMs/1000}s 后重试 (${attempt+1}/${maxRetries})`);
-          await new Promise(r => setTimeout(r, waitMs));
+          console.warn(`[GLM] 429 限流，${waitMs / 1000}s 后重试 (${attempt + 1}/${maxRetries})`);
+          await new Promise((r) => setTimeout(r, waitMs));
           continue;
         }
         throw e;
@@ -62,7 +68,6 @@ class GlmAdapter extends ILlm {
 
   /**
    * 根据任务难度路由到对应模型（成本优化）
-   * low=便宜模型；high=强模型
    */
   pickModel(difficulty = "medium") {
     return this.models[difficulty] || this.models.medium;
@@ -71,8 +76,16 @@ class GlmAdapter extends ILlm {
   async complete(prompt, opts = {}) {
     return this._retryWithBackoff(async () => {
       await this._rateLimit();
+      if (this.useAnthropic) {
+        return this._completeAnthropic(prompt, opts);
+      }
+      return this._completeOpenAI(prompt, opts);
+    });
+  }
 
-      const model = this.pickModel(opts.difficulty);
+  // ── OpenAI 协议（/chat/completions）──
+  async _completeOpenAI(prompt, opts = {}) {
+    const model = this.pickModel(opts.difficulty);
     const messages = [];
     if (opts.systemPrompt) {
       messages.push({ role: "system", content: opts.systemPrompt });
@@ -86,15 +99,11 @@ class GlmAdapter extends ILlm {
       max_tokens: config.llm.glm.maxTokens,
     };
     if (opts.jsonMode) {
-      // 智谱 GLM 支持强制 JSON 输出
       body.response_format = { type: "json_object" };
     }
 
     const ctrl = new AbortController();
-    const timer = setTimeout(
-      () => ctrl.abort(),
-      config.llm.glm.timeoutMs
-    );
+    const timer = setTimeout(() => ctrl.abort(), config.llm.glm.timeoutMs);
 
     try {
       const resp = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -109,35 +118,15 @@ class GlmAdapter extends ILlm {
 
       if (!resp.ok) {
         const errText = await resp.text();
-        console.error(`[GLM] API 错误 ${resp.status}: ${errText.slice(0, 300)}`);
+        console.error(`[GLM/OpenAI] API 错误 ${resp.status}: ${errText.slice(0, 300)}`);
         throw new Error(`GLM API ${resp.status}: ${errText.slice(0, 200)}`);
       }
 
       const data = await resp.json();
-      const text =
-        data.choices?.[0]?.message?.content || "";
+      const text = data.choices?.[0]?.message?.content || "";
+      if (!text) console.error(`[GLM/OpenAI] 空响应:`, JSON.stringify(data).slice(0, 300));
 
-      if (!text) {
-        console.error(`[GLM] 空响应:`, JSON.stringify(data).slice(0, 300));
-      }
-
-      let structured = null;
-      if (opts.jsonMode !== false && text) {
-        try {
-          structured = JSON.parse(text);
-        } catch {
-          // 模型偶尔返回非纯 JSON（带 markdown 围栏），尝试提取
-          const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-          if (match) {
-            try {
-              structured = JSON.parse(match[1]);
-            } catch {
-              /* 忽略，structured 保持 null */
-            }
-          }
-        }
-      }
-
+      const structured = this._tryParseJson(text, opts);
       return {
         text,
         structured,
@@ -147,7 +136,84 @@ class GlmAdapter extends ILlm {
     } finally {
       clearTimeout(timer);
     }
-    }); // end _retryWithBackoff
+  }
+
+  // ── Anthropic 协议（/v1/messages）── GLM Coding Plan 走这个
+  async _completeAnthropic(prompt, opts = {}) {
+    const model = this.pickModel(opts.difficulty);
+
+    // Anthropic 协议要求 system 单独传，messages 里不包含 system
+    const messages = [{ role: "user", content: prompt }];
+    const body = {
+      model,
+      max_tokens: config.llm.glm.maxTokens,
+      temperature: config.llm.glm.temperature,
+      messages,
+    };
+    if (opts.systemPrompt) {
+      body.system = opts.systemPrompt;
+    }
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), config.llm.glm.timeoutMs);
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/v1/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Anthropic 协议用 x-api-key，不是 Bearer
+          "x-api-key": this.apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(body),
+        signal: ctrl.signal,
+      });
+
+      if (!resp.ok) {
+        const errText = await resp.text();
+        console.error(`[GLM/Anthropic] API 错误 ${resp.status}: ${errText.slice(0, 300)}`);
+        throw new Error(`GLM API ${resp.status}: ${errText.slice(0, 200)}`);
+      }
+
+      const data = await resp.json();
+      // Anthropic 响应结构: data.content = [{type:"text", text:"..."}]
+      const text = Array.isArray(data.content)
+        ? data.content.filter((b) => b.type === "text").map((b) => b.text).join("")
+        : "";
+
+      if (!text) console.error(`[GLM/Anthropic] 空响应:`, JSON.stringify(data).slice(0, 300));
+
+      const structured = this._tryParseJson(text, opts);
+      return {
+        text,
+        structured,
+        model,
+        tokensUsed: data.usage?.input_tokens + data.usage?.output_tokens || 0,
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /**
+   * 尝试从模型返回文本中解析 JSON（支持 markdown 围栏）
+   */
+  _tryParseJson(text, opts) {
+    if (opts.jsonMode === false || !text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (match) {
+        try {
+          return JSON.parse(match[1]);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
   }
 }
 

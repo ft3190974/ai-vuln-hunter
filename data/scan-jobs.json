@@ -8887,5 +8887,56 @@
     },
     "error": null,
     "completedAt": "2026-07-12T18:05:22.244Z"
+  },
+  "scan-1783880262286": {
+    "scanId": "scan-1783880262286",
+    "status": "completed",
+    "startedAt": "2026-07-12T18:17:42.330Z",
+    "report": {
+      "scanId": "scan-1783880262286",
+      "startedAt": "2026-07-12T18:17:42.331Z",
+      "completedAt": "2026-07-12T18:17:57.928Z",
+      "current": "FAILED",
+      "findings": [],
+      "pocs": [],
+      "patches": [],
+      "attackScenario": null,
+      "projectContext": null,
+      "learnSuggestions": [],
+      "log": [
+        {
+          "state": "INIT",
+          "msg": "开始归一化工具输出",
+          "level": "info",
+          "at": "2026-07-12T18:17:42.335Z"
+        },
+        {
+          "state": "INIT",
+          "msg": "归一化完成，共 0 个 Finding 候选",
+          "level": "info",
+          "at": "2026-07-12T18:17:42.335Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "开始理解项目...",
+          "level": "info",
+          "at": "2026-07-12T18:17:42.337Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "提取到 15 个关键文件",
+          "level": "info",
+          "at": "2026-07-12T18:17:42.373Z"
+        },
+        {
+          "state": "PROJECT_UNDERSTAND",
+          "msg": "状态执行失败: GLM API 429: {\"error\":{\"code\":\"1113\",\"message\":\"余额不足或无可用资源包,请充值。\"}}",
+          "level": "error",
+          "at": "2026-07-12T18:17:57.928Z"
+        }
+      ]
+    },
+    "error": null,
+    "completedAt": "2026-07-12T18:17:57.928Z"
   }
 }

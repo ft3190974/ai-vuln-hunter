@@ -111,16 +111,29 @@ function settingsRoutes() {
       if (cfg.provider === "mock") {
         return res.json({ success: true, message: "Mock LLM 始终可用", latencyMs: 0 });
       }
+      const baseUrl = (cfg.baseUrl || "").replace(/\/+$/, "");
+      const useAnthropic = /\/anthropic(\/|$)/i.test(baseUrl);
       const start = Date.now();
-      const resp = await fetch(`${cfg.baseUrl}/chat/completions`, {
+      const url = useAnthropic ? `${baseUrl}/v1/messages` : `${baseUrl}/chat/completions`;
+      const headers = useAnthropic
+        ? { "Content-Type": "application/json", "x-api-key": cfg.apiKey, "anthropic-version": "2023-06-01" }
+        : { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` };
+      const body = useAnthropic
+        ? { model: cfg.model, max_tokens: 5, messages: [{ role: "user", content: "ping" }] }
+        : { model: cfg.model, messages: [{ role: "user", content: "ping" }], max_tokens: 5 };
+      const resp = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.apiKey}` },
-        body: JSON.stringify({ model: cfg.model, messages: [{ role: "user", content: "ping" }], max_tokens: 5 }),
+        headers,
+        body: JSON.stringify(body),
         signal: AbortSignal.timeout(10000),
       });
       const latencyMs = Date.now() - start;
-      if (resp.ok) res.json({ success: true, message: `连接成功（${latencyMs}ms）`, latencyMs });
-      else res.json({ success: false, message: `HTTP ${resp.status}`, latencyMs });
+      if (resp.ok) {
+        res.json({ success: true, message: `连接成功（${useAnthropic ? "Anthropic 协议" : "OpenAI 协议"}，${latencyMs}ms）`, latencyMs });
+      } else {
+        const errText = await resp.text().catch(() => "");
+        res.json({ success: false, message: `HTTP ${resp.status}: ${errText.slice(0, 80)}`, latencyMs });
+      }
     } catch (e) {
       res.json({ success: false, message: e.message?.slice(0, 100) });
     }
