@@ -96,6 +96,25 @@ class OrchestratorEngine {
     ctx.sourceInput = sourceInput || null;
     ctx.toolOutputs = toolOutputs || {};
 
+    // 整体超时保护：默认 8 分钟，防止 LLM 慢调用/无限重试导致任务永远卡住
+    const timeoutMs = (scanRequest.options?.timeoutSec || 480) * 1000;
+    let timer;
+    const timeoutP = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`编排超时（${timeoutMs / 1000}秒），可能 LLM 响应过慢或目标过大`)), timeoutMs);
+    });
+
+    try {
+      return await Promise.race([
+        timeoutP,
+        this._runInner(ctx, scanRequest, toolOutputs),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async _runInner(ctx, scanRequest, toolOutputs) {
+
     // 打印启动信息
     const llmMode = config.llm.mode;
     console.log(`${C.info}┌─ 编排启动${C.reset}`);

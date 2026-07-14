@@ -34,12 +34,12 @@ class GlmAdapter extends ILlm {
   }
 
   /**
-   * 限流：每次调用间隔至少 1.5 秒（避免 429）
+   * 限流：每次调用间隔（避免 429）
    */
   async _rateLimit() {
     const now = Date.now();
     const elapsed = now - this._lastCallTime;
-    const minInterval = 1500; // 1.5 秒/次 ≈ 40 RPM
+    const minInterval = 600; // 0.6 秒/次 ≈ 100 RPM（批量扫描需要更快）
     if (elapsed < minInterval) {
       await new Promise((r) => setTimeout(r, minInterval - elapsed));
     }
@@ -52,7 +52,7 @@ class GlmAdapter extends ILlm {
         return await fn();
       } catch (e) {
         if (e.message?.includes("429") && attempt < maxRetries) {
-          const waitMs = 5000 * (attempt + 1); // 5s, 10s 退避
+          const waitMs = 3000 * (attempt + 1); // 3s, 6s 退避
           console.warn(`[GLM] 429 限流，${waitMs / 1000}s 后重试 (${attempt + 1}/${maxRetries})`);
           await new Promise((r) => setTimeout(r, waitMs));
           continue;

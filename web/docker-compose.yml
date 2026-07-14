@@ -26,6 +26,7 @@ services:
       - LLM_MODE=${LLM_MODE:-mock}
       - GLM_BASE_URL=${GLM_BASE_URL:-}
       - GLM_API_KEY=${GLM_API_KEY:-}
+      - GLM_MODEL=${GLM_MODEL:-glm-4-flash}
       - SANDBOX_MODE=${SANDBOX_MODE:-mock}
       - VULNDB_LIVE=${VULNDB_LIVE:-0}
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -43,6 +44,8 @@ services:
       # 可观测性
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - NODE_ENV=${NODE_ENV:-production}
+      # 前端构建产物路径（app.js 用 __dirname 定位，Dockerfile 已正确放置）
+      - TZ=Asia/Shanghai
     volumes:
       # 持久化扫描任务/漏洞数据/LLM设置，重启不丢失
       - app-data:/app/data
