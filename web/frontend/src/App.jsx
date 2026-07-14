@@ -19,11 +19,15 @@ export default function App() {
   const navigate = useNavigate();
   const { theme, toggle: toggleTheme } = useTheme();
 
-  // 启动时探测后端是否启用认证（若启用且未登录 → 跳登录）
+  // 启动时探测后端是否启用认证（若启用且未登录 → 跳登录；未启用 → 匿名登录）
   useEffect(() => {
     api.health().then((h) => {
       if (h?.authEnabled && !auth.isLoggedIn()) {
         navigate("/login");
+      }
+      if (!h?.authEnabled) {
+        // 未启用认证，自动设为匿名管理员（跳过登录页）
+        setUser({ username: "anonymous", role: "admin" });
       }
       setAuthChecked(true);
     }).catch(() => setAuthChecked(true));

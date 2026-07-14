@@ -155,7 +155,7 @@ export default function ScanPage() {
       // 通知后端把任务标记为失败，避免任务管理里永远显示「运行中」
       try { await api.updateScanStatus(id, "failed", msg); } catch {}
     };
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 1200; i++) {
       await new Promise((r) => setTimeout(r, 500));
       // 被终止（abortTask 把 pollingRef 置 false）→ 立即退出，不再请求
       if (!pollingRef.current) return;
@@ -179,7 +179,7 @@ export default function ScanPage() {
         // 否则继续轮询，等服务恢复
       }
     }
-    await fail("扫描超时（60 秒内未完成，可能目标过大或 LLM 响应慢）");
+    await fail("扫描超时（10 分钟内未完成，可能目标过大或 LLM 响应慢）");
   };
 
   // 挂载时：如果有未完成的任务（submitting 且 scanId 存在），自动恢复轮询

@@ -41,7 +41,7 @@ const config = {
       // 请求参数
       temperature: 0.2, // 漏洞判定要确定性，低温
       maxTokens: 2048,
-      timeoutMs: 30000,
+      timeoutMs: Number(process.env.GLM_TIMEOUT_MS) || 120000,
     },
   },
 
