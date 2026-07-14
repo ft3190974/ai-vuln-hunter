@@ -148,6 +148,13 @@ export default function ScanPage() {
 
   const pollJob = async (id) => {
     let consecutiveErrors = 0; // 连续失败计数（服务崩溃/重启时容错）
+    const fail = async (msg) => {
+      setError(msg);
+      setSubmitting(false);
+      pollingRef.current = false;
+      // 通知后端把任务标记为失败，避免任务管理里永远显示「运行中」
+      try { await api.updateScanStatus(id, "failed", msg); } catch {}
+    };
     for (let i = 0; i < 120; i++) {
       await new Promise((r) => setTimeout(r, 500));
       try {
@@ -164,17 +171,13 @@ export default function ScanPage() {
         consecutiveErrors++;
         // 服务可能崩溃/重启中，容忍前 6 次连续失败（≈3 秒），超过才判定失败
         if (consecutiveErrors >= 6) {
-          setError(`服务暂不可用：${e.message}（可能因扫描目标过大导致服务重启，请减小被测包后重试）`);
-          setSubmitting(false);
-          pollingRef.current = false;
+          await fail(`服务暂不可用：${e.message}（可能因扫描目标过大导致服务重启，请减小被测包后重试）`);
           return;
         }
         // 否则继续轮询，等服务恢复
       }
     }
-    setSubmitting(false);
-    setError("扫描超时");
-    pollingRef.current = false;
+    await fail("扫描超时（60 秒内未完成，可能目标过大或 LLM 响应慢）");
   };
 
   // 挂载时：如果有未完成的任务（submitting 且 scanId 存在），自动恢复轮询
@@ -212,16 +215,16 @@ export default function ScanPage() {
 
       {/* 模式切换 */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <button className={mode === "upload" ? "" : "secondary"} onClick={() => setMode("upload")}>
+        <button className={mode === "upload" ? "" : "secondary"} onClick={() => setMode("upload")} disabled={submitting}>
           📦 上传文件（推荐）
         </button>
-        <button className={mode === "path" ? "" : "secondary"} onClick={() => setMode("path")}>
+        <button className={mode === "path" ? "" : "secondary"} onClick={() => setMode("path")} disabled={submitting}>
           📁 指定路径
         </button>
-        <button className={mode === "code" ? "" : "secondary"} onClick={() => setMode("code")}>
+        <button className={mode === "code" ? "" : "secondary"} onClick={() => setMode("code")} disabled={submitting}>
           ✏️ 粘贴代码
         </button>
-        <button className={mode === "web" ? "" : "secondary"} onClick={() => setMode("web")}>
+        <button className={mode === "web" ? "" : "secondary"} onClick={() => setMode("web")} disabled={submitting}>
           🌐 Web 渗透
         </button>
       </div>
@@ -264,18 +267,19 @@ export default function ScanPage() {
         {mode === "upload" && (
           <div>
             <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragOver={(e) => { e.preventDefault(); if (!submitting) setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
-              onDrop={onDrop}
-              onClick={() => fileInputRef.current?.click()}
+              onDrop={(e) => { if (submitting) return; onDrop(e); }}
+              onClick={() => { if (submitting) return; fileInputRef.current?.click(); }}
               style={{
                 border: `2px dashed ${dragOver ? "var(--accent)" : "var(--border)"}`,
                 borderRadius: 8,
                 padding: "40px 20px",
                 textAlign: "center",
-                cursor: "pointer",
+                cursor: submitting ? "not-allowed" : "pointer",
                 transition: "all 0.2s",
                 background: dragOver ? "var(--accent-bg)" : "transparent",
+                opacity: submitting ? 0.6 : 1,
               }}
             >
               <input ref={fileInputRef} type="file" style={{ display: "none" }}
@@ -283,6 +287,14 @@ export default function ScanPage() {
                 accept=".zip,.tar,.gz,.bin,.elf,.exe,.so,.dll,.o,.jar,.class,.img,.fw" />
               {uploading ? (
                 <p style={{ color: "var(--accent)" }}>上传中...</p>
+              ) : submitting ? (
+                <div>
+                  <p style={{ fontSize: 32 }}>🔒</p>
+                  <p style={{ color: "var(--text-dim)" }}>扫描进行中，无法上传新文件</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>
+                    请等待当前任务完成，或在「任务管理」中删除后再发起新任务
+                  </p>
+                </div>
               ) : uploadedFile ? (
                 <div>
                   <p style={{ fontSize: 32 }}>✅</p>
@@ -313,7 +325,7 @@ export default function ScanPage() {
                 </div>
               )}
             </div>
-            {uploadedFile && (
+            {uploadedFile && !submitting && (
               <button className="secondary" style={{ marginTop: 12, fontSize: 12 }}
                 onClick={() => { setUploadedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}>
                 重新上传

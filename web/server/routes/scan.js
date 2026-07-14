@@ -119,6 +119,33 @@ function scanRoutes({ engine, scanJobs }) {
     return res.json(list);
   });
 
+  // 标记任务状态（前端轮询超时/主动取消时调用，避免任务永远卡在 running）
+  router.patch("/scan/:id/status", (req, res) => {
+    try {
+      const job = scanJobs.get(req.params.id);
+      if (!job) {
+        return res.status(404).json({ error: `任务 ${req.params.id} 不存在` });
+      }
+      const { status, error } = req.body || {};
+      if (!["running", "completed", "failed"].includes(status)) {
+        return res.status(400).json({ error: "status 必须是 running/completed/failed" });
+      }
+      // 已完成/失败的任务不允许再改回 running（避免覆盖最终态）
+      if (job.status === "completed" || job.status === "failed") {
+        return res.json({ scanId: req.params.id, status: job.status, skipped: true });
+      }
+      job.status = status;
+      if (error) job.error = error;
+      if (status === "failed" || status === "completed") {
+        job.completedAt = new Date().toISOString();
+      }
+      saveScanJobs(scanJobs);
+      res.json({ scanId: req.params.id, status: job.status });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // 删除任务（同时删除该任务的所有 Finding）
   router.delete("/scan/:id", async (req, res) => {
     try {

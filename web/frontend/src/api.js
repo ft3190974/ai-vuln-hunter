@@ -66,6 +66,8 @@ export const api = {
   listScans: () => request("/scan"),
   deleteScan: (id) => request(`/scan/${id}`, { method: "DELETE" }),
   cleanupOrphanFindings: () => request("/scan/orphans/cleanup", { method: "DELETE" }),
+  updateScanStatus: (id, status, error) =>
+    request(`/scan/${id}/status`, { method: "PATCH", body: { status, error } }),
   vulnDbSources: () => request("/vuln-db/sources"),
   syncVulnDb: (source) =>
     request(`/vuln-db/sync${source ? "?source=" + source : ""}`, { method: "POST" }),
