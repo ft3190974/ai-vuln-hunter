@@ -1,11 +1,4 @@
 {
-  "scan-1783909679437": {
-    "scanId": "scan-1783909679437",
-    "status": "running",
-    "startedAt": "2026-07-13T02:27:59.520Z",
-    "report": null,
-    "error": null
-  },
   "scan-1783909747183": {
     "scanId": "scan-1783909747183",
     "status": "completed",
@@ -171,5 +164,12 @@
     },
     "error": null,
     "completedAt": "2026-07-13T02:30:16.939Z"
+  },
+  "scan-1783999544960": {
+    "scanId": "scan-1783999544960",
+    "status": "running",
+    "startedAt": "2026-07-14T03:25:44.964Z",
+    "report": null,
+    "error": null
   }
 }

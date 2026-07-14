@@ -1,8 +1,9 @@
 // src/pages/ScanPage.jsx — 扫描任务页（支持文件上传 + 路径 + 粘贴代码）
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api.js";
 import { useCountUp } from "../hooks/useCountUp.js";
+import { useSessionState, clearScanSession } from "../hooks/useSessionState.js";
 
 const STATES = [
   ["INIT", "预处理", "1-3s", "fast"],
@@ -31,8 +32,8 @@ function ResultStat({ label, value }) {
 }
 
 export default function ScanPage() {
-  const [mode, setMode] = useState("upload"); // upload | path | code | web
-  const [uploadedFile, setUploadedFile] = useState(null);
+  const [mode, setMode] = useSessionState("scan:mode", "upload"); // upload | path | code | web
+  const [uploadedFile, setUploadedFile] = useSessionState("scan:uploadedFile", null);
   const [uploading, setUploading] = useState(false);
   const [webUrl, setWebUrl] = useState("");
   const [authConfirmed, setAuthConfirmed] = useState(false);
@@ -46,12 +47,13 @@ export default function ScanPage() {
   const [manualPath, setManualPath] = useState("");
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [scanId, setScanId] = useState(null);
-  const [job, setJob] = useState(null);
-  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useSessionState("scan:submitting", false);
+  const [scanId, setScanId] = useSessionState("scan:scanId", null);
+  const [job, setJob] = useSessionState("scan:job", null);
+  const [error, setError] = useSessionState("scan:error", null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+  const pollingRef = useRef(false); // 防止重复启动轮询
 
   // 文件上传处理（带前端大小预检）
   const MAX_UPLOAD_MB = 20;
@@ -92,6 +94,7 @@ export default function ScanPage() {
     setSubmitting(true);
     setError(null);
     setJob(null);
+    pollingRef.current = true; // 标记轮询进行中，避免恢复 effect 重复启动
     try {
       const id = `scan-${Date.now()}`;
       setScanId(id);
@@ -153,6 +156,7 @@ export default function ScanPage() {
         setJob(j);
         if (j.status === "completed" || j.status === "failed") {
           setSubmitting(false);
+          pollingRef.current = false;
           if (j.status === "failed") setError(j.error || "扫描失败");
           return;
         }
@@ -162,6 +166,7 @@ export default function ScanPage() {
         if (consecutiveErrors >= 6) {
           setError(`服务暂不可用：${e.message}（可能因扫描目标过大导致服务重启，请减小被测包后重试）`);
           setSubmitting(false);
+          pollingRef.current = false;
           return;
         }
         // 否则继续轮询，等服务恢复
@@ -169,7 +174,18 @@ export default function ScanPage() {
     }
     setSubmitting(false);
     setError("扫描超时");
+    pollingRef.current = false;
   };
+
+  // 挂载时：如果有未完成的任务（submitting 且 scanId 存在），自动恢复轮询
+  // 解决：扫描进行中切换到其他导航页再回来，任务状态不丢失、轮询继续
+  useEffect(() => {
+    if (scanId && submitting && !pollingRef.current) {
+      pollingRef.current = true;
+      pollJob(scanId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const reachedStates = new Set();
   if (job?.report?.log) job.report.log.forEach((l) => reachedStates.add(l.state));
