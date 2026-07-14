@@ -1,0 +1,21 @@
+# .dockerignore — 排除不需要的文件，减小构建上下文、加速构建
+**/node_modules/
+**/.vite/
+.git/
+.gitignore
+*.log
+*.md
+!README.md
+!DEPLOY.md
+
+# 运行时数据（容器内自己生成，不从宿主拷贝）
+data/
+web/server/data/
+
+# 临时部署脚本
+deploy_final.py
+deploy_upload.py
+server_deploy.js
+*.tar.gz
+*.bak
+tmp/

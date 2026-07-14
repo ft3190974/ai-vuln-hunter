@@ -39,17 +39,49 @@ pm2 status                    # 状态
 
 ## 方式 B：Docker 部署
 
+> 前置：服务器已装好 Docker + Docker Compose（`curl -fsSL https://get.docker.com | sh`）
+
 ```bash
 git clone https://github.com/ft3190974/ai-vuln-hunter.git
-cd ai-vuln-hunter/web
-docker compose up -d
+cd ai-vuln-hunter
+
+# 方式 1：docker compose（推荐，含数据卷持久化）
+cd web
+docker compose up -d --build
 # 访问 http://服务器IP:3000
+
+# 方式 2：纯 docker build（手动管理）
+cd ai-vuln-hunter
+docker build -t ai-vuln-hunter -f web/Dockerfile .
+docker run -d --name ai-vuln-hunter -p 3000:3000 -v avh-data:/app/data ai-vuln-hunter
 ```
+
+⚠️ **关键**：构建上下文必须是**项目根目录**（不是 `web/` 目录），因为 Dockerfile 要 COPY orchestrator/mcp-server 等多个模块：
+- compose 已配好 `context: ..`，直接 `docker compose up -d --build` 即可
+- 手动 build 必须用 `-f web/Dockerfile .`（最后的 `.` 是项目根）
 
 含数据库版（Postgres + Neo4j）：
 ```bash
-DB_MODE=postgres+neo4j docker compose --profile db up -d
+DB_MODE=postgres+neo4j docker compose --profile db up -d --build
 ```
+
+### Docker 部署失败排查
+```bash
+# 看构建日志（哪一步失败）
+docker compose up -d --build 2>&1 | tee build.log
+
+# 看容器日志（启动后崩溃）
+docker logs ai-vuln-hunter --tail 50
+
+# 进容器排查
+docker exec -it ai-vuln-hunter sh
+ls /app/orchestrator/node_modules/  # 确认依赖装好了
+```
+
+常见问题：
+- **MODULE_NOT_FOUND**：旧版 Dockerfile 漏装了 orchestrator/mcp-server 依赖，已在新版修复。确认 `git pull` 到最新。
+- **npm ci 报错**：检查对应模块的 `package-lock.json` 是否存在，不存在则先在本地 `npm install` 生成后提交。
+- **端口占用**：`WEB_PORT=8080 docker compose up -d` 换端口。
 
 ---
 

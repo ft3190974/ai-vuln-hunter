@@ -2,6 +2,13 @@
 node_modules/
 **/node_modules/
 
+# 临时部署脚本（含明文密码，禁止入库）
+deploy_final.py
+deploy_upload.py
+server_deploy.js
+*_deploy.py
+deploy_remote.*
+
 # 构建产物（提交到仓库，服务器不用构建）
 # web/frontend/dist/
 # web/frontend/.vite/

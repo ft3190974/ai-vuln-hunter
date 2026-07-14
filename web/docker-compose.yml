@@ -16,8 +16,8 @@ services:
   # ── 主应用 ──
   ai-vuln-hunter:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: web/Dockerfile
     image: ai-vuln-hunter:latest
     container_name: ai-vuln-hunter
     ports:
@@ -38,11 +38,14 @@ services:
       # 认证（默认关闭）
       - AUTH_ENABLED=${AUTH_ENABLED:-0}
       - JWT_SECRET=${JWT_SECRET:-}
+      # 持久化文件路径（与 Dockerfile VOLUME /app/data 对应）
+      - FINDING_STORE_FILE=/app/data/findings.json
       # 可观测性
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - NODE_ENV=${NODE_ENV:-production}
     volumes:
-      - vuln-db-data:/data
+      # 持久化扫描任务/漏洞数据/LLM设置，重启不丢失
+      - app-data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,6 +93,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  vuln-db-data:
+  app-data:
   pg-data:
   neo4j-data:
