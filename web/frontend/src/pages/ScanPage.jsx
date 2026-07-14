@@ -157,6 +157,8 @@ export default function ScanPage() {
     };
     for (let i = 0; i < 120; i++) {
       await new Promise((r) => setTimeout(r, 500));
+      // 被终止（abortTask 把 pollingRef 置 false）→ 立即退出，不再请求
+      if (!pollingRef.current) return;
       try {
         const j = await api.getScan(id);
         consecutiveErrors = 0; // 请求成功，重置
@@ -189,6 +191,29 @@ export default function ScanPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 终止当前任务：停止轮询 + 后端标记 failed + 删除任务记录
+  const [aborting, setAborting] = useState(false);
+  const abortTask = async () => {
+    if (!scanId) return;
+    if (!confirm(`确定终止任务 ${scanId}？\n\n终止后任务记录会被删除，已生成的漏洞不受影响。\n注意：LLM 调用一旦发出无法中断，后台可能还会跑一会儿，但结果会被丢弃。`)) return;
+    setAborting(true);
+    pollingRef.current = false; // 让正在跑的 pollJob 在下次循环时检测到并退出
+    try {
+      // 1. 后端标记失败（让 engine.run 的 then/catch 知道结果已不需要）
+      await api.updateScanStatus(scanId, "failed", "用户主动终止任务").catch(() => {});
+      // 2. 删除任务记录（连带其 findings）
+      await api.deleteScan(scanId).catch(() => {});
+    } finally {
+      // 3. 重置前端状态
+      setSubmitting(false);
+      setJob(null);
+      setScanId(null);
+      setError(null);
+      setAborting(false);
+      clearScanSession();
+    }
+  };
 
   const reachedStates = new Set();
   if (job?.report?.log) job.report.log.forEach((l) => reachedStates.add(l.state));
@@ -416,9 +441,25 @@ export default function ScanPage() {
           {submitting ? "⏳ 正在挖掘中...（请勿重复提交，预计 1-5 分钟）" : "🚀 开始挖掘"}
         </button>
         {submitting && (
+          <button
+            onClick={abortTask}
+            disabled={aborting}
+            style={{
+              marginTop: 12, marginLeft: 8, fontSize: 13, padding: "8px 16px",
+              background: "transparent",
+              border: "1px solid #e5484d",
+              color: "#e5484d",
+              cursor: aborting ? "wait" : "pointer",
+              borderRadius: 6,
+            }}
+          >
+            {aborting ? "终止中..." : "✖ 终止任务"}
+          </button>
+        )}
+        {submitting && (
           <div className="msg msg-info" style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
             <span className="loading" style={{ fontSize: 18 }}>🔄</span>
-            <span>任务进行中：LLM 正在分析，编排引擎逐个状态执行。请耐心等待，可在下方查看实时进度。</span>
+            <span>任务进行中：LLM 正在分析，编排引擎逐个状态执行。可点击「终止任务」取消。</span>
           </div>
         )}
       </div>
